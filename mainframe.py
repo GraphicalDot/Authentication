@@ -13,6 +13,7 @@ from form import Form
 import requests
 import tempfile
 import zipfile
+import shutil
 ID_ONE = 1
 ID_TWO = 2
 ID_THREE = 3
@@ -63,46 +64,70 @@ class CanvasPanel(wx.Frame):
 
 	def close_window(self, event):
 		self.Close()
-
+	
+	
 	def yes_authentication_code(self, event):
 		frame = wx.TextEntryDialog(self, "Enter the authentication code", "", style=wx.OK|wx.CANCEL)
 		auth_token = frame.GetValue()
+		
+		working_dir = os.path.abspath(os.path.dirname(__file__))
+		#This creates a new working directory with aprent directory in which this .exe is running by the name of the data
+		if not os.path.exists("%s/Data"%working_dir):
+			os.mkdir("%s/Data"%working_dir)
+
+		path = "%s/Data/WholeZip.zip"%working_dir
 		if frame.ShowModal() == wx.ID_OK:
 			mac_id = getHwAddr("eth0")
 			try:
-				response = requests.get("http://localhost:8989/v1/download",data={"mac_id": mac_id, "auth_token": frame.GetValue()})
+				pdata={"mac_id": mac_id, "auth_token": frame.GetValue(), "path": os.path.exists(path)}
+				response = requests.get("http://localhost:8989/v1/download",data= pdata)
+
 				print response
 			except requests.ConnectionError:
 				raise StandardError("Your internet connection is not working")	
 			
-			try:
-				response.json().get("error")
-				print "Wrong auth token"
-				return 
-			except:
-				print "no error"
-		
-			print "here is the response %s"%response.ok
-			if response.ok:
-				print "response is ok"
-				working_dir = os.path.abspath(os.path.dirname(__file__))
-				print "here is working directory %s"%working_dir
-				path = "%s/somefile.zip"%working_dir
-				print "here is the path %s"%path
-				if not os.path.exists(path):
-					print "path doesnot esists"
-					file_name = open(path, "w")
-					file_name.write(response.content)
-					file_name.close()
-					print "Path doesnt exists"	
-				
-				dirpath = tempfile.mkdtemp()
-				print dirpath
-				with  cd(dirpath):
+			self.handle_response(response, frame.GetValue())
+		return
+
+	def handle_response(self, response, key):
+		working_dir = os.path.abspath(os.path.dirname(__file__))
+		path = "%s/Data/WholeZip.zip"%working_dir
+		encrypted_file_path = "%s/Data/file.zip"%working_dir
+		try:
+			response.json().get("error")
+			print "Wrong auth token"
+			return 
+		except:
+			pass
+
+		if response.ok:
+			if not os.path.exists(path):
+				file_name = open(path, "w")
+				file_name.write(response.content)
+				file_name.close()
+			
+			if not os.path.exists(encrypted_file_path):
+				with  cd("%s/Data/"%working_dir):
+					print path
 					zip_file = zipfile.ZipFile(path) 
-					zipfile.ZipFile.extractall(zip_file, pwd=frame.GetValue())
-					subprocess.call(["wine", "Play me.exe"])
+					zipfile.ZipFile.extractall(zip_file)
 				
+			dirpath = tempfile.mkdtemp()
+			print dirpath
+			with  cd(dirpath):
+				zip_file = zipfile.ZipFile(encrypted_file_path) 
+				zipfile.ZipFile.extractall(zip_file, pwd=key)
+				
+				src = "%s/Data/"%working_dir
+				import glob
+				for filename in glob.glob(os.path.join(src, '*.*')):
+					shutil.copy(filename, dirpath)
+
+				subprocess.call(["ls"])
+				subprocess.call(["wine", "Play me.exe"])
+		
+			print dirpath
+			shutil.rmtree(dirpath)
 		return
 
 

@@ -23,6 +23,7 @@ reguser_parser.add_argument('auth_token', type=str, required=True, location='for
 zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('mac_id', type=str, required=True, location='form')
 zip_parser.add_argument('auth_token', type=str, required=True, location='form')
+zip_parser.add_argument('path', type=str, required=True, location='form')
 
 
 class RegisterUser(restful.Resource):
@@ -88,20 +89,19 @@ class GetFile(restful.Resource):
 		taken no action yet on basis of the given skip and limit arguments.
 		"""
 		args = zip_parser.parse_args()
-		print args["auth_token"]
+		print args["path"]
 		if args["auth_token"] == str(1111):
 			print "\n\nauth token is valid and ready to go \n\n"
 	
-			file_name = "original/file.zip"
+			file_name = "/home/k/Downloads/Atest/whole.zip"
 			f = open(file_name, "r")
 			response = make_response(f.read())
-			response.headers["Content-Disposition"] = "attachment; filename=file.zip"
+			response.headers["Content-Disposition"] = "attachment; filename=whole.zip"
 			return response
 		else:
 			return {
 				"error": True,
 				"success": False,}
-
 		return
 
 api.add_resource(RegisterUser, '/v1/register_user')
