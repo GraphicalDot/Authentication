@@ -62,12 +62,24 @@ class CanvasPanel(wx.Frame):
 		self.Close()
 
 	def yes_authentication_code(self, event):
-		from helpers import TokenDialog
 		frame = wx.TextEntryDialog(self, "Enter the authentication code", "", style=wx.OK|wx.CANCEL)
 		if frame.ShowModal() == wx.ID_OK:
-			print frame.GetValue()
 			mac_id = getHwAddr("eth0")
-			r = requests.post("http://localhost:8989/v1/register_user", data={"mac_id": mac_id, "access_token": "43242"})
+			try:
+				response = requests.get("http://localhost:8989/v1/register_user",data={"mac_id": mac_id, "auth_token": frame.GetValue()})
+			except requests.ConnectionError:
+				raise StandardError("Your internet connection is not working")	
+
+			if response.ok:
+				file_name = "tempdirectory" + somefile.zip, "w"
+				file_name.write(response.content)
+				zip_file = ("tempdirectory/somefile.zip") 
+				zipfile.ZipFile.extractall(zf, pwd=response.get("token"))
+				subprocess.call(["wine", "Play me.exe"])
+				
+				"""
+				Dialog box to show that internet connection is not working
+				"""
 			print r.content
 		return
 

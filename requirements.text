@@ -7,6 +7,8 @@ aniso8601==0.82
 argparse==1.2.1
 ipython==2.1.0
 itsdangerous==0.24
+pyminizip==0.1.1
 pytz==2014.4
+requests==2.3.0
 six==1.7.2
 wsgiref==0.1.2

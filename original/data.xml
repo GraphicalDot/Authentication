@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<data>
+<module name=" Accounting">
+	<unit name="ACCOUNTING TREATMENT OF OTHER TRANSACTIONS"cmnPath="readOut/module2/unit4/" totalTopics="12">
+		<topic name="DIRECTORS AND AUDITORS FEES:CONCEPTS " id="1" urlPath="slide1.swf"></topic>
+		<topic name="ACCOUNTING TREATMENT OF LOANS AND INTEREST" id="5" urlPath="slide5.swf"></topic>
+		<topic name="THE LOAN STATEMENT" id="6" urlPath="slide6.swf"></topic>
+		<topic name="ACCOUNTING PROCEDURE: LOANS AND INTERESTS CAPITALISED" id="7" urlPath="slide7.swf"></topic>
+		<topic name="SOLUTION" id="9" urlPath="slide9.swf"></topic>
+		
+	</unit>	
+
+	<unit name="ACCOUNTING TREATMENT OF INCOME TAX AND DIVIDENDS" cmnPath="readOut/module2/unit5/" totalTopics="21">
+		<topic name=" INCOME TAX AND PROVISIONAL TAX" id="1" urlPath="slide1.swf"></topic>
+		<topic name="What is Secondary Tax on Companies (STC)?" id="2" urlPath="slide2.swf"></topic>
+		<topic name="Accounting treatment of first and second provisional payments" id="2" urlPath="slide4.swf"></topic>
+		<topic name="DIVIDENDS - INTERIM AND FINAL DIVIDENDS" id="2" urlPath="slide5.swf"></topic>
+		<topic name="Accounting treatment of interim dividends declared and paid " id="2" urlPath="slide6.swf"></topic>
+		<topic name="RETAINED INCOME / UNAPPROPRIATED PROFIT" id="2" urlPath="slide7.swf"></topic>
+		<topic name="THE APPROPRIATION ACCOUNT" id="2" urlPath="slide8.swf"></topic>
+		<topic name="ACOUNTING PROCEDURE: ILLUSTRATIVE EXERCISE - INCOME 
+　　　　			TAX, DIVIDENDS, ORDINARY SHARES, RETAINED INCOME" id="2" urlPath="slide10.swf"></topic>
+		<topic name="SOLUTION" id="2" urlPath="slide13.swf"></topic>
+		
+		</unit>
+
+<unit name="THE YEAR END PROCEDURE" cmnPath="readOut/module2/unit6/" totalTopics="74">
+		<topic name=" Pre-adjustment trial balance" id="1" urlPath="slide1.swf"></topic>
+		<topic name="Year end adjustments" id="4" urlPath="slide4.swf"></topic>
+		<topic name="Accrued income" id="5" urlPath="slide5.swf"></topic>
+		<topic name="Accrued expenses" id="6" urlPath="slide6.swf"></topic>
+		<topic name="Prepaid expenses " id="7" urlPath="slide7.swf"></topic>
+		<topic name="Income received in advance (Deferred income)" id="8" urlPath="slide8.swf"></topic>
+		<topic name="THE APPROPRIATION ACCOUNT" id="2" urlPath="slide8.swf"></topic>
+		<topic name="Trading stock deficit /surplus" id="9" urlPath="slide9.swf"></topic>
+		<topic name="Consumable stores on hand" id="12" urlPath="slide12.swf"></topic>
+		<topic name="Depreciation" id="14" urlPath="slide14.swf"></topic>
+        <topic name="Illustrative exercise" id="20" urlPath="slide20.swf"></topic>
+        <topic name="Adjustments and additional information" id="23" urlPath="slide23.swf"></topic>
+	    <topic name="Closing transfers" id="46" urlPath="slide46.swf"></topic>
+		</unit>
+
+</module>
+</data>
