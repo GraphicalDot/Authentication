@@ -83,18 +83,26 @@ class RegisterUser(restful.Resource):
 class GetFile(restful.Resource):
 
     def get(self):
-        """
-        Returns the friends of the logged in user against whom he has
-        taken no action yet on basis of the given skip and limit arguments.
-        """
-        args = zip_parser.parse_args()
+		"""
+		Returns the friends of the logged in user against whom he has
+		taken no action yet on basis of the given skip and limit arguments.
+		"""
+		args = zip_parser.parse_args()
+		print args["auth_token"]
+		if args["auth_token"] == str(1111):
+			print "\n\nauth token is valid and ready to go \n\n"
 	
-	file_name = "original/file.zip"
-	f = open(file_name, "r")
-	response = make_response(f.read())
-	response.headers["Content-Disposition"] = "attachment; filename=file.zip"
-	return response
+			file_name = "original/file.zip"
+			f = open(file_name, "r")
+			response = make_response(f.read())
+			response.headers["Content-Disposition"] = "attachment; filename=file.zip"
+			return response
+		else:
+			return {
+				"error": True,
+				"success": False,}
 
+		return
 
 api.add_resource(RegisterUser, '/v1/register_user')
 api.add_resource(GetFile, '/v1/download')

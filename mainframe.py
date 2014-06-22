@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
 import subprocess
+import os
 import wx
 import re
 import sys
@@ -10,6 +11,8 @@ import hashlib
 from helpers import getHwAddr
 from form import Form
 import requests
+import tempfile
+import zipfile
 ID_ONE = 1
 ID_TWO = 2
 ID_THREE = 3
@@ -35,8 +38,8 @@ class CanvasPanel(wx.Frame):
 		self.button_two = wx.Button(self.button_panel, ID_TWO, label='No', size=(100, 30))
 		self.button_three = wx.Button(self.button_panel, ID_THREE, label='Close', size=(100, 30))
 
-		self.Bind(wx.EVT_BUTTON, self.no_authentication_code, id=ID_ONE)
-		self.Bind(wx.EVT_BUTTON, self.yes_authentication_code, id=ID_TWO)
+		self.Bind(wx.EVT_BUTTON, self.yes_authentication_code, id=ID_ONE)
+		self.Bind(wx.EVT_BUTTON, self.no_authentication_code, id=ID_TWO)
 		self.Bind(wx.EVT_BUTTON, self.close_window, id=ID_THREE)
 
 		self.button_box.Add(self.button_one)
@@ -63,25 +66,58 @@ class CanvasPanel(wx.Frame):
 
 	def yes_authentication_code(self, event):
 		frame = wx.TextEntryDialog(self, "Enter the authentication code", "", style=wx.OK|wx.CANCEL)
+		auth_token = frame.GetValue()
 		if frame.ShowModal() == wx.ID_OK:
 			mac_id = getHwAddr("eth0")
 			try:
-				response = requests.get("http://localhost:8989/v1/register_user",data={"mac_id": mac_id, "auth_token": frame.GetValue()})
+				response = requests.get("http://localhost:8989/v1/download",data={"mac_id": mac_id, "auth_token": frame.GetValue()})
+				print response
 			except requests.ConnectionError:
 				raise StandardError("Your internet connection is not working")	
-
+			
+			try:
+				response.json().get("error")
+				print "Wrong auth token"
+				return 
+			except:
+				print "no error"
+		
+			print "here is the response %s"%response.ok
 			if response.ok:
-				file_name = "tempdirectory" + somefile.zip, "w"
-				file_name.write(response.content)
-				zip_file = ("tempdirectory/somefile.zip") 
-				zipfile.ZipFile.extractall(zf, pwd=response.get("token"))
-				subprocess.call(["wine", "Play me.exe"])
+				print "response is ok"
+				working_dir = os.path.abspath(os.path.dirname(__file__))
+				print "here is working directory %s"%working_dir
+				path = "%s/somefile.zip"%working_dir
+				print "here is the path %s"%path
+				if not os.path.exists(path):
+					print "path doesnot esists"
+					file_name = open(path, "w")
+					file_name.write(response.content)
+					file_name.close()
+					print "Path doesnt exists"	
 				
-				"""
-				Dialog box to show that internet connection is not working
-				"""
-			print r.content
+				dirpath = tempfile.mkdtemp()
+				print dirpath
+				with  cd(dirpath):
+					zip_file = zipfile.ZipFile(path) 
+					zipfile.ZipFile.extractall(zip_file, pwd=frame.GetValue())
+					subprocess.call(["wine", "Play me.exe"])
+				
 		return
+
+
+class cd:
+	"""Context manager for changing the current working directory"""
+	def __init__(self, newPath):
+		self.newPath = newPath
+
+	def __enter__(self):
+		self.savedPath = os.getcwd()
+		os.chdir(self.newPath)
+
+	def __exit__(self, etype, value, traceback):
+		os.chdir(self.savedPath)
+
 
 def run_app():
 	app = wx.PySimpleApp()
