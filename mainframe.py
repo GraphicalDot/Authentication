@@ -93,41 +93,29 @@ class CanvasPanel(wx.Frame):
 		working_dir = os.path.abspath(os.path.dirname(__file__))
 		path = "%s/Data/WholeZip.zip"%working_dir
 		encrypted_file_path = "%s/Data/file.zip"%working_dir
-		try:
-			response.json().get("error")
-			print "Wrong auth token"
+		if response.json().get("error"):
+			print response.json().get("error")
 			return 
-		except:
-			pass
 
-		if response.ok:
-			if not os.path.exists(path):
-				file_name = open(path, "w")
-				file_name.write(response.content)
-				file_name.close()
-			
-			if not os.path.exists(encrypted_file_path):
-				with  cd("%s/Data/"%working_dir):
-					print path
-					zip_file = zipfile.ZipFile(path) 
-					zipfile.ZipFile.extractall(zip_file)
-				
-			dirpath = tempfile.mkdtemp()
-			print dirpath
-			with  cd(dirpath):
-				zip_file = zipfile.ZipFile(encrypted_file_path) 
-				zipfile.ZipFile.extractall(zip_file, pwd=key)
-				
-				src = "%s/Data/"%working_dir
-				import glob
-				for filename in glob.glob(os.path.join(src, '*.*')):
-					shutil.copy(filename, dirpath)
 
-				subprocess.call(["ls"])
-				subprocess.call(["wine", "Play me.exe"])
+		if not os.path.exists(path):
+			file_name = open(path, "w")
+			file_name.write(response.content)
+			file_name.close()
 		
-			print dirpath
-			shutil.rmtree(dirpath)
+		dirpath = tempfile.mkdtemp()
+		print dirpath
+		with  cd(dirpath):
+			zip_file = zipfile.ZipFile(path) 
+			zipfile.ZipFile.extractall(zip_file)
+			zip_file = zipfile.ZipFile("%s/file.zip"%dirpath) 
+			zipfile.ZipFile.extractall(zip_file, pwd=key)
+				
+			subprocess.call(["ls"])
+			subprocess.call(["wine", "Play me.exe"])
+		
+		print dirpath
+		shutil.rmtree(dirpath)
 		return
 
 

@@ -9,7 +9,7 @@ from flask.ext.restful import reqparse
 from flask import make_response
 from flask import Response
 import zipfile
-
+from database import collection
 
 
 app = Flask(__name__)
@@ -89,20 +89,48 @@ class GetFile(restful.Resource):
 		taken no action yet on basis of the given skip and limit arguments.
 		"""
 		args = zip_parser.parse_args()
+		print args
 		print args["path"]
-		if args["auth_token"] == str(1111):
-			print "\n\nauth token is valid and ready to go \n\n"
-	
-			file_name = "/home/k/Downloads/Atest/whole.zip"
-			f = open(file_name, "r")
-			response = make_response(f.read())
-			response.headers["Content-Disposition"] = "attachment; filename=whole.zip"
-			return response
-		else:
+		print args["mac_id"]
+		users = collection("users")
+		print users
+
+		if not users.find_one({"key": args["auth_token"],}):
+			if users.find_one({"mac_id": args["mac_id"]}):
+				return {
+					"error": True,
+					"success": False,
+					"error_code": 201,
+					"messege": "The Key Entered is not valid",}
+			else:
+				return {
+					"error": True,
+					"success": False,
+					"error_code": 202,
+					"messege": "Please register for this file to run",}
+
+
+		if not users.find_one({"key": args["auth_token"], "mac_id": args["mac_id"]}):
 			return {
-				"error": True,
-				"success": False,}
-		return
+					"error": True,
+					"success": False,
+					"error_code": 203,
+					"messege": "Same key cannot be used on two Computers",}
+
+		
+		if args["path"]:
+			return{
+					"error": False,
+					"success": True,
+					"key": users.find_one({"key": "a637b99e8e"}, fields={"_id": 0, "hash": 1})["hash"]
+				}
+	
+		file_name = "/home/k/Downloads/Atest/whole.zip"
+		f = open(file_name, "r")
+		response = make_response(f.read())
+		response.headers["Content-Disposition"] = "attachment; filename=whole.zip"
+		return response
+		
 
 api.add_resource(RegisterUser, '/v1/register_user')
 api.add_resource(GetFile, '/v1/download')
