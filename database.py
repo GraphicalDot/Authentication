@@ -21,8 +21,7 @@ def collection(name):
 	"""
 	try:
 		collection = DB.create_collection(name)
-		if collection.index_information():
-			collection.create_index("%s_id"%(name), safe=True, unique=True, dropDups=True)
+		collection.create_index("hash", safe=True, unique=True, dropDups=True)
 		return collection
 	except pymongo.errors.CollectionInvalid:
 		return eval("DB.%s"%(name))

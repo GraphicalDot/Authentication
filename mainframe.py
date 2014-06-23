@@ -57,9 +57,8 @@ class CanvasPanel(wx.Frame):
 
 
 	def no_authentication_code(self, event):
-		dia = Form(self, -1, '')
-		val = dia.ShowModal()
-		dia.Destroy()
+		dia = Form()
+		dia.Show()	
 		return
 
 	def close_window(self, event):

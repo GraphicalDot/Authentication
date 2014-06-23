@@ -14,18 +14,21 @@ import hashlib
 import tempfile
 import subprocess
 import shutil
+
 app = Flask(__name__)
 api = restful.Api(app)
 # '/register_user' arguments parser
 reguser_parser = reqparse.RequestParser()
 
 reguser_parser.add_argument('mac_id', type=str, required=True, location='form')
-reguser_parser.add_argument('user_name', type=str, required=True, location='form')
-reguser_parser.add_argument('user_email', type=str, required=True, location='form')
+reguser_parser.add_argument('first_name', type=str, required=True, location='form')
+reguser_parser.add_argument('second_name', type=str, required=False, location='form')
+reguser_parser.add_argument('email_id', type=str, required=True, location='form')
+reguser_parser.add_argument('platform', type=str, required=True, location='form')
+reguser_parser.add_argument('modules', type=str, required=True, location='form')
+reguser_parser.add_argument('country', type=str, required=True, location='form')
 
 
-
-reguser_parser.add_argument('auth_token', type=str, required=True, location='form')
 
 # '/validate_token' arguments
 zip_parser = reqparse.RequestParser()
@@ -45,22 +48,27 @@ class RegisterUser(restful.Resource):
 		The hash function will be used to encrypt the zip file sent to the user
 
 		"""
+		args = reguser_parser.parse_args()
+		print args
+		users = collection("users")
 
-		if not users.find_one({"user_email": args["user_email"], "mac_id": args["mac_id"]}):
+		if not users.find_one({"email_id": args["email_id"], "mac_id": args["mac_id"], "modules": args["modules"]}):
 		        args = reguser_parser.parse_args()
 			users = collection("users")
-			string = "".join(args.keys())
+			string = args.get("email_id").lower() + args.get("mac_id").lower() + args.get("first_name").lower() + args.get("modules")
 			hash = hashlib.md5(string).hexdigest()
 			key = hash[-10:]
 
 			args["hash"] = hash
 			args["key"] = key
-			#collection.update(args. upsert= True)
-			#send an email to the user with the key
-			
+			users.insert(args, safe=True)
+
+			##TODO: send an email through ses
 			return {
-					"error": False,
-					"success": True}
+				"error": False,
+				"success": True,
+				"messege": "Registration has been completed",}
+		
 		return {
 				"error": False,
 				"success": True,
@@ -135,7 +143,7 @@ class GetFile(restful.Resource):
 	
 		response = make_response(f.read())
 		response.headers["Content-Disposition"] = "attachment; filename=temporary.zip"
-                
+		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
 		#This deletes the temporary encrypted zip file
 		shutil.rmtree(dirpath)
 
