@@ -10,83 +10,68 @@ from flask import make_response
 from flask import Response
 import zipfile
 from database import collection
-
+import hashlib
 
 app = Flask(__name__)
 api = restful.Api(app)
 # '/register_user' arguments parser
 reguser_parser = reqparse.RequestParser()
+
 reguser_parser.add_argument('mac_id', type=str, required=True, location='form')
+reguser_parser.add_argument('user_name', type=str, required=True, location='form')
+reguser_parser.add_argument('user_email', type=str, required=True, location='form')
+
+
+
 reguser_parser.add_argument('auth_token', type=str, required=True, location='form')
 
 # '/validate_token' arguments
 zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('mac_id', type=str, required=True, location='form')
-zip_parser.add_argument('auth_token', type=str, required=True, location='form')
+zip_parser.add_argument('key', type=str, required=True, location='form')
 zip_parser.add_argument('path', type=str, required=True, location='form')
 
 
 class RegisterUser(restful.Resource):
 
     def post(self):
-        """	
-        Returns a success if the user already exists on the system or creates 
-        a new user and then returns success. 
+		"""
+		When a new user register to our website or form. He submits his/her detail throught this method
+		Then this method calcualtes the hash of user_email, user_name, mac_id 
+		
+		the key which will be provided to the user will be the last 10 alphabets of the function.
+		The hash function will be used to encrypt the zip file sent to the user
 
-        Returns an error in the case of an invalid access token or in case there
-        was a problem during the creation of a user.
-        """
+		"""
 
-        args = reguser_parser.parse_args()
+		if not users.find_one({"user_email": args["user_email"], "mac_id": args["mac_id"]}):
+		        args = reguser_parser.parse_args()
+			users = collection("users")
+			string = "".join(args.keys())
+			hash = hashlib.md5(string).hexdigest()
+			key = hash[-10:]
 
-	"""
-        # create the user instance
-        try:
-            user = User(args['fb_user_id'], args['fb_access_token'])
-            user.updating_gcm(args['fb_user_id'], args['gcm_registration_id'])
-        # fb access token is invalid
-        except AccessTokenInvalidError as e:
-            if e.code is 2:
-				return {
-					"error": True,
-					"error_code": 1221,
-					"error_message": "Facebook access token is not valid.",
-					"success": False
-						}
-            if e.code is 1:
-				return {
-					"error": True,
-					"error_code": 1222,
-					"error_message": "Facebook User ID does not match with the given access token.",
-					"success": False
-						}
+			args["hash"] = hash
+			args["key"] = key
+			#collection.update(args. upsert= True)
+			#send an email to the user with the key
+			
+			return {
+					"error": False,
+					"success": True}
+		return {
+				"error": False,
+				"success": True,
+				"messege": "Registration has already been done"
+				}
 
-        # create a new user if it doesn't exist in the DB
-        except UserDoesNotExistError:
-            # TODO: Handle 'UserCreationError' later.
-            User.create(args['fb_user_id'], args['fb_access_token'], args['gcm_registration_id'])
-            return {
-                "error": False,
-                "success": True,
-                "new_registration": True
-                    }
 
-        # the user exists and the access token & user id provided were valid
-        return {
-            "error": False,
-            "success": True,
-            "new_registration": False,
-            }
-	"""
-	print args["mac_id"]
-	return
 
 class GetFile(restful.Resource):
 
     def get(self):
 		"""
-		Returns the friends of the logged in user against whom he has
-		taken no action yet on basis of the given skip and limit arguments.
+		If path is not present then it returns the new zip encrypted with the hash
 		"""
 		args = zip_parser.parse_args()
 		print args
@@ -95,7 +80,7 @@ class GetFile(restful.Resource):
 		users = collection("users")
 		print users
 
-		if not users.find_one({"key": args["auth_token"],}):
+		if not users.find_one({"key": args["key"],}):
 			if users.find_one({"mac_id": args["mac_id"]}):
 				return {
 					"error": True,
@@ -110,7 +95,7 @@ class GetFile(restful.Resource):
 					"messege": "Please register for this file to run",}
 
 
-		if not users.find_one({"key": args["auth_token"], "mac_id": args["mac_id"]}):
+		if not users.find_one({"key": args["key"], "mac_id": args["mac_id"]}):
 			return {
 					"error": True,
 					"success": False,
@@ -122,14 +107,52 @@ class GetFile(restful.Resource):
 			return{
 					"error": False,
 					"success": True,
-					"key": users.find_one({"key": "a637b99e8e"}, fields={"_id": 0, "hash": 1})["hash"]
+					"hash": users.find_one({"key": args["key"]}, fields={"_id": 0, "hash": 1})["hash"]
 				}
+
+
+		print "\n\n Now the file is being transfffered"
+		password = users.find_one({"key": "a637b99e8e"}, fields={"_id": 0, "hash": 1})["hash"]
+		#This creates a temporary folder 
+		dirpath = tempfile.mkdtemp() 
+
+		#This gets the location where the data is present 
+		
+		#for remote server
+		#data_location = "/root/Cyclone2/CycloneData/Whole.zip"
+
+		#for localhost
+		data_location = "/home/k/Downloads/Atest/Whole.zip"
+
+		#This is the whole path of the ebcrypted xip file in the temporary directory
+		temporary_zip_file = "%s/temporary.zip"%dirpath
+
+		#This creates the encrypted zip file on the location mentioned above
+		subprocess.call(["7z", "a",  temporary_zip_file,  "-P%s"%password , data_location])
 	
-		file_name = "/home/k/Downloads/Atest/whole.zip"
-		f = open(file_name, "r")
+		#This reads the data from the temporary location present above
+		f = open(temporary_zip_file, "r")
+	
 		response = make_response(f.read())
 		response.headers["Content-Disposition"] = "attachment; filename=whole.zip"
+                
+		#This deletes the temporary encrypted zip file
+		#shutil.rmtree(dirpath)
+
 		return response
+
+
+class cd:
+        """Context manager for changing the current working directory"""
+        def __init__(self, newPath):
+                self.newPath = newPath
+
+        def __enter__(self):
+                self.savedPath = os.getcwd()
+                os.chdir(self.newPath)
+
+        def __exit__(self, etype, value, traceback):
+                os.chdir(self.savedPath)
 		
 
 api.add_resource(RegisterUser, '/v1/register_user')

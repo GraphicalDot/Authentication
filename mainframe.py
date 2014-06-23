@@ -79,7 +79,8 @@ class CanvasPanel(wx.Frame):
 		if frame.ShowModal() == wx.ID_OK:
 			mac_id = getHwAddr("eth0")
 			try:
-				pdata={"mac_id": mac_id, "auth_token": frame.GetValue(), "path": os.path.exists(path)}
+				pdata={"mac_id": mac_id, "key": frame.GetValue(), "path": os.path.exists(path)}
+				print pdata
 				response = requests.get("http://localhost:8989/v1/download",data= pdata)
 
 				print response
@@ -90,11 +91,12 @@ class CanvasPanel(wx.Frame):
 		return
 
 	def handle_response(self, response, key):
+		print response.text
 		working_dir = os.path.abspath(os.path.dirname(__file__))
 		path = "%s/Data/WholeZip.zip"%working_dir
 		encrypted_file_path = "%s/Data/file.zip"%working_dir
 		if response.json().get("error"):
-			print response.json().get("error")
+			print response.json().get("messege")
 			return 
 
 
