@@ -11,7 +11,9 @@ from flask import Response
 import zipfile
 from database import collection
 import hashlib
-
+import tempfile
+import subprocess
+import shutil
 app = Flask(__name__)
 api = restful.Api(app)
 # '/register_user' arguments parser
@@ -69,17 +71,17 @@ class RegisterUser(restful.Resource):
 
 class GetFile(restful.Resource):
 
-    def get(self):
+	def get(self):
 		"""
 		If path is not present then it returns the new zip encrypted with the hash
 		"""
+		import json
 		args = zip_parser.parse_args()
-		print args
 		print args["path"]
 		print args["mac_id"]
 		users = collection("users")
-		print users
 
+		print json.dumps(args)
 		if not users.find_one({"key": args["key"],}):
 			if users.find_one({"mac_id": args["mac_id"]}):
 				return {
@@ -103,13 +105,11 @@ class GetFile(restful.Resource):
 					"messege": "Same key cannot be used on two Computers",}
 
 		
-		if args["path"]:
+		if args["path"] == "True":
 			return{
 					"error": False,
 					"success": True,
-					"hash": users.find_one({"key": args["key"]}, fields={"_id": 0, "hash": 1})["hash"]
-				}
-
+					"hash": users.find_one({"key": args["key"]}, fields={"_id": 0, "hash": 1})["hash"]}
 
 		print "\n\n Now the file is being transfffered"
 		password = users.find_one({"key": "a637b99e8e"}, fields={"_id": 0, "hash": 1})["hash"]
@@ -134,10 +134,10 @@ class GetFile(restful.Resource):
 		f = open(temporary_zip_file, "r")
 	
 		response = make_response(f.read())
-		response.headers["Content-Disposition"] = "attachment; filename=whole.zip"
+		response.headers["Content-Disposition"] = "attachment; filename=temporary.zip"
                 
 		#This deletes the temporary encrypted zip file
-		#shutil.rmtree(dirpath)
+		shutil.rmtree(dirpath)
 
 		return response
 

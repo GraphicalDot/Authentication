@@ -68,7 +68,6 @@ class CanvasPanel(wx.Frame):
 	
 	def yes_authentication_code(self, event):
 		frame = wx.TextEntryDialog(self, "Enter the authentication code", "", style=wx.OK|wx.CANCEL)
-		auth_token = frame.GetValue()
 		
 		working_dir = os.path.abspath(os.path.dirname(__file__))
 		#This creates a new working directory with aprent directory in which this .exe is running by the name of the data
@@ -79,46 +78,74 @@ class CanvasPanel(wx.Frame):
 		if frame.ShowModal() == wx.ID_OK:
 			mac_id = getHwAddr("eth0")
 			try:
-				pdata={"mac_id": mac_id, "key": frame.GetValue(), "path": os.path.exists(path)}
-				print pdata
-				response = requests.get("http://localhost:8989/v1/download",data= pdata)
+				
+				#SEcond time user
+				if os.path.exists(path):
+				
+					form_data={"mac_id": mac_id, "key": frame.GetValue(), "path": True}
+					response = requests.get("http://localhost:8989/v1/download",data= form_data)
+					self.already_registered_user(response, path)
+				else:
+					form_data={"mac_id": mac_id, "key": frame.GetValue(), "path": False}
+					response = requests.get("http://localhost:8989/v1/download",data= form_data)
+					self.new_user(response, path, frame.GetValue())
 
-				print response
 			except requests.ConnectionError:
 				raise StandardError("Your internet connection is not working")	
 			
-			self.handle_response(response, frame.GetValue())
 		return
 
-	def handle_response(self, response, key):
-		print response.text
-		working_dir = os.path.abspath(os.path.dirname(__file__))
-		path = "%s/Data/WholeZip.zip"%working_dir
-		encrypted_file_path = "%s/Data/file.zip"%working_dir
+	def already_registered_user(self, response, path):
 		if response.json().get("error"):
-			print response.json().get("messege")
-			return 
+			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
+			dlg.ShowModal()
+			dlg.Destroy()
+			return
 
-
-		if not os.path.exists(path):
-			file_name = open(path, "w")
-			file_name.write(response.content)
-			file_name.close()
-		
 		dirpath = tempfile.mkdtemp()
 		print dirpath
 		with  cd(dirpath):
-			zip_file = zipfile.ZipFile(path) 
-			zipfile.ZipFile.extractall(zip_file)
-			zip_file = zipfile.ZipFile("%s/file.zip"%dirpath) 
-			zipfile.ZipFile.extractall(zip_file, pwd=key)
+				zip_file = zipfile.ZipFile(path) 
+				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
 				
-			subprocess.call(["ls"])
-			subprocess.call(["wine", "Play me.exe"])
+				zip_file = zipfile.ZipFile("Whole.zip")
+				zipfile.ZipFile.extractall(zip_file)
+				
+				subprocess.call(["ls"])
+				subprocess.call(["wine", "Play me.exe"])
 		
 		print dirpath
 		shutil.rmtree(dirpath)
 		return
+
+
+	def new_user(self, response, path, key):
+		#if path doesnt exists the response will have the zip file and this writes that encrypted zip file into the path
+		file_name = open(path, "w")
+		file_name.write(response.content)
+		file_name.close()
+		#Now the Data Folder do have WholeZip.zip and now the path exists
+
+		dirpath = tempfile.mkdtemp()
+		print dirpath
+				
+		form_data={"mac_id": getHwAddr("eth0"), "key": key, "path": True}
+		response = requests.get("http://localhost:8989/v1/download", data= form_data)
+		
+		with  cd(dirpath):
+				zip_file = zipfile.ZipFile(path) 
+				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
+				
+				zip_file = zipfile.ZipFile("Whole.zip")
+				zipfile.ZipFile.extractall(zip_file)
+				
+				subprocess.call(["ls"])
+				subprocess.call(["wine", "Play me.exe"])
+		
+		print dirpath
+		shutil.rmtree(dirpath)
+		return
+
 
 
 class cd:
