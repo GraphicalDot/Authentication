@@ -38,6 +38,11 @@ zip_parser.add_argument('path', type=str, required=True, location='form')
 zip_parser.add_argument('check_module', type=str, required=False, location='form')
 
 
+
+test_parser = reqparse.RequestParser()
+test_parser.add_argument('password', type=str, required=True, location='form')
+
+
 class RegisterUser(restful.Resource):
 
     def post(self):
@@ -162,7 +167,7 @@ class GetFile(restful.Resource):
 		
 
 		#This is the whole path of the ebcrypted xip file in the temporary directory
-		temporary_zip_file = "%s/%s_%s.zip"%(dirpath, user_os[:3], module_name)
+		temporary_zip_file = "%s/%s_%s.zip"%(temporary_dir_path,  user_os[:3], module_name)
 
 		#This creates the encrypted zip file on the location mentioned above
 		subprocess.call(["7z", "a",  temporary_zip_file,  "-P%s"%password , data_location])
@@ -171,12 +176,44 @@ class GetFile(restful.Resource):
 		f = open(temporary_zip_file, "r")
 	
 		response = make_response(f.read())
+		response.headers['Cache-Control'] = 'no-cache'
 		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
 		#This deletes the temporary encrypted zip file
 		shutil.rmtree(dirpath)
 
 		return response
+
+class TestDownload(restful.Resource):
+
+	def get(self):
+		args = test_parser.parse_args()
+
+		#for localhost
+		data_location = "/root/Cyclone2/Data/%s/%s_%s.zip"%(module_name, user_os[:3], module_name)
+
+
+		#This creates a temporary folder 
+		temporary_dir_path = tempfile.mkdtemp() 
+
+		
+
+		#This is the whole path of the ebcrypted xip file in the temporary directory
+		temporary_zip_file = "%s/%s_%s.zip"%(temporary_dir_path,  user_os[:3], module_name)
+
+		#This creates the encrypted zip file on the location mentioned above
+		subprocess.call(["7z", "a",  temporary_zip_file,  "-P%s"%args["password"] , data_location])
+	
+		#This reads the data from the temporary location present above
+		f = open(temporary_zip_file, "r")
+	
+		response = make_response(f.read())
+		response.headers['Cache-Control'] = 'no-cache'
+		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
+		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
+		response.headers['X-Accel-Redirect'] = temporary_zip_file
+		#This deletes the temporary encrypted zip file
+		shutil.rmtree(dirpath)
 
 
 class cd:
