@@ -67,58 +67,69 @@ class CanvasPanel(wx.Frame):
 	
 	def yes_authentication_code(self, event):
 		frame = wx.TextEntryDialog(self, "Enter the authentication code", "", style=wx.OK|wx.CANCEL)
+		mac_id = getHwAddr("eth0")
 		
+		if frame.ShowModal() == wx.ID_OK:
+			form_data={"mac_id": mac_id, "key": frame.GetValue(), "check_module": True, "path": False}
+			response = requests.get("http://localhost:8989/v1/download",data= form_data)
+			
+			if response.json().get("error"):
+				dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
+				dlg.ShowModal()
+				dlg.Destroy()
+				return
+		
+		module_name = response.json()["module_name"]
+		hashkey = response.json()["hash"]
+		user_os = sys.platform[:3]
+
 		working_dir = os.path.abspath(os.path.dirname(__file__))
 		#This creates a new working directory with aprent directory in which this .exe is running by the name of the data
 		if not os.path.exists("%s/Data"%working_dir):
 			os.mkdir("%s/Data"%working_dir)
+			if not os.path.exists("%s/Data/%s"%(working_dir, module_name)):
+				with cd("%s/Data"%working_dir):
+					os.mkdir(module_name)
+		
+		
+		path = "%s/Data/%s/%s_%s.zip"%(working_dir, module_name, user_os[:3], module_name)
+		print path
 
-		path = "%s/Data/WholeZip.zip"%working_dir
-		if frame.ShowModal() == wx.ID_OK:
-			mac_id = getHwAddr("eth0")
-			try:
-				
-				#SEcond time user
-				if os.path.exists(path):
-				
-					form_data={"mac_id": mac_id, "key": frame.GetValue(), "path": True}
-					response = requests.get("http://localhost:8989/v1/download",data= form_data)
-					self.already_registered_user(response, path)
-				else:
-					form_data={"mac_id": mac_id, "key": frame.GetValue(), "path": False}
-					response = requests.get("http://localhost:8989/v1/download",data= form_data)
-					self.new_user(response, path, frame.GetValue())
 
-			except requests.ConnectionError:
-				raise StandardError("Your internet connection is not working")	
+		try:
+				
+			#SEcond time user
+			if os.path.exists(path):
+				self.already_registered_user(response, path, hashkey, module_name, user_os)
 			
+			else:
+				form_data={"mac_id": mac_id, "key": frame.GetValue(), "path": False}
+				response = requests.get("http://localhost:8989/v1/download",data= form_data)
+				self.new_user(response, path, hashkey, module_name, user_os)
+
+		except requests.ConnectionError:
+			raise StandardError("Your internet connection is not working")	
 		return
 
-	def already_registered_user(self, response, path):
-		if response.json().get("error"):
-			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
-			dlg.ShowModal()
-			dlg.Destroy()
-			return
+	def already_registered_user(self, response, path, hashkey, module_name, user_os):
 
 		dirpath = tempfile.mkdtemp()
 		print dirpath
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
-				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
+				zipfile.ZipFile.extractall(zip_file, pwd=hashkey)
 				
-				zip_file = zipfile.ZipFile("Whole.zip")
+				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name))
 				zipfile.ZipFile.extractall(zip_file)
 				
 				subprocess.call(["ls"])
 				subprocess.call(["wine", "Play me.exe"])
 		
-		print dirpath
 		shutil.rmtree(dirpath)
 		return
 
 
-	def new_user(self, response, path, key):
+	def new_user(self, response, path, hashkey, module_name, user_os):
 		#if path doesnt exists the response will have the zip file and this writes that encrypted zip file into the path
 		file_name = open(path, "w")
 		file_name.write(response.content)

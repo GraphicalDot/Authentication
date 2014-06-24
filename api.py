@@ -35,6 +35,7 @@ zip_parser = reqparse.RequestParser()
 zip_parser.add_argument('mac_id', type=str, required=True, location='form')
 zip_parser.add_argument('key', type=str, required=True, location='form')
 zip_parser.add_argument('path', type=str, required=True, location='form')
+zip_parser.add_argument('check_module', type=str, required=False, location='form')
 
 
 class RegisterUser(restful.Resource):
@@ -90,14 +91,23 @@ class GetFile(restful.Resource):
 		users = collection("users")
 
 		print json.dumps(args)
-		if not users.find_one({"key": args["key"],}):
+
+		if args["check_module"]:#When user has paid the expenses and bought the module
+			if users.find_one({"key": args["key"], "mac_id": args["mac_id"]}):
+				return {
+					"success": True,
+					"error": False,
+					"module_name": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["modules"],
+					"hash": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["hash"],}
+
+		if not users.find_one({"key": args["key"],}): #when the key is wrong
 			if users.find_one({"mac_id": args["mac_id"]}):
 				return {
 					"error": True,
 					"success": False,
 					"error_code": 201,
 					"messege": "The Key Entered is not valid",}
-			else:
+			else: 					#When the user has not registered for may module
 				return {
 					"error": True,
 					"success": False,
@@ -105,11 +115,11 @@ class GetFile(restful.Resource):
 					"messege": "Please register for this file to run",}
 
 
-		if not users.find_one({"key": args["key"], "mac_id": args["mac_id"]}):
+		if users.find_one({"key": args["key"]})["mac_id"] != args["mac_id"]:
 			return {
 					"error": True,
 					"success": False,
-					"error_code": 203,
+					"error_code": 1203,
 					"messege": "Same key cannot be used on two Computers",}
 
 		
@@ -119,21 +129,40 @@ class GetFile(restful.Resource):
 					"success": True,
 					"hash": users.find_one({"key": args["key"]}, fields={"_id": 0, "hash": 1})["hash"]}
 
-		print "\n\n Now the file is being transfffered"
-		password = users.find_one({"key": "a637b99e8e"}, fields={"_id": 0, "hash": 1})["hash"]
-		#This creates a temporary folder 
-		dirpath = tempfile.mkdtemp() 
-
-		#This gets the location where the data is present 
+		print "\n\n Now the file is being transffered"
 		
+		###
+		#The below code only exceutes when users exists and path doesnt exists
+		###
+		user_data = find_one({"key": args["key"]}, fields={"_id": 0})
+
+
+		password = user_data["hash"]
+		module_name = user_data["modules"]
+		user_os = user_data["platform"]
+
+	
+		#This gets the location where the data is present 
+		#The data location will be selected on the basis of the modules the user bought and the platform
+		#directory structure for data:
+		# 	Data:
+		# 		Economics 				Accounting  		 	etc	
+		#			:win_Economics.zip				:win_Accounting.zip
+		# 			:dar_Economics.zip 				:dar_Accounting.zip
 		#for remote server
-		#data_location = "/root/Cyclone2/CycloneData/Whole.zip"
+		#data_location = "/root/Cyclone2/Data/%s/%s_%s.zip"%(module_name, user_os[:3], module_name)
 
 		#for localhost
-		data_location = "/home/k/Downloads/Atest/Whole.zip"
+		data_location = "/home/k/Downloads/Data/%s/%s_%s.zip"%(module_name, user_os[:3], module_name)
+
+
+		#This creates a temporary folder 
+		temporary_dir_path = tempfile.mkdtemp() 
+
+		
 
 		#This is the whole path of the ebcrypted xip file in the temporary directory
-		temporary_zip_file = "%s/temporary.zip"%dirpath
+		temporary_zip_file = "%s/%s_%s.zip"%(dirpath, user_os[:3], module_name)
 
 		#This creates the encrypted zip file on the location mentioned above
 		subprocess.call(["7z", "a",  temporary_zip_file,  "-P%s"%password , data_location])
@@ -142,7 +171,7 @@ class GetFile(restful.Resource):
 		f = open(temporary_zip_file, "r")
 	
 		response = make_response(f.read())
-		response.headers["Content-Disposition"] = "attachment; filename=temporary.zip"
+		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
 		#This deletes the temporary encrypted zip file
 		shutil.rmtree(dirpath)
