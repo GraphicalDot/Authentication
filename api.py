@@ -231,6 +231,7 @@ class cd:
 
 api.add_resource(RegisterUser, '/v1/register_user')
 api.add_resource(GetFile, '/v1/download')
+api.add_resource(TestDownload, '/v1/testdownload')
 
 
 
