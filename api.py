@@ -150,7 +150,7 @@ class GetFile(restful.Resource):
 		###
 		#The below code only exceutes when users exists and path doesnt exists
 		###
-		user_data = find_one({"key": args["key"]}, fields={"_id": 0})
+		user_data = users.find_one({"key": args["key"]}, fields={"_id": 0})
 
 
 		password = user_data["hash"]
@@ -247,5 +247,5 @@ api.add_resource(TestDownload, '/v1/testdownload')
 
 
 if __name__ == '__main__':
-    app.run(port=8989, debug=True)
+    app.run(port=8000, debug=True)
 

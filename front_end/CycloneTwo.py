@@ -25,7 +25,7 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-url = "http://localhost:8989"
+url = "http://23.239.29.14:8080"
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
@@ -266,14 +266,14 @@ class CanvasPanel(wx.Frame):
 			return
 
 		form_data={"mac_id": mac_id, "key": frame.result, "check_module": True, "path": False}
-		response = requests.get("http://23.239.29.14:8080/v1/download",data= form_data)
+		response = requests.get("%s/v1/download"%url,data= form_data)
 			
 		if response.json().get("error"):
 			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
 			dlg.Destroy()
 			return
-		"""
+		
 		module_name = response.json()["module_name"]
 		hashkey = response.json()["hash"]
 		user_os = sys.platform[:3]
@@ -298,14 +298,13 @@ class CanvasPanel(wx.Frame):
 				self.already_registered_user(response, path, hashkey, module_name, user_os)
 			
 			else:
-				form_data={"mac_id": mac_id, "key": frame.GetValue(), "path": False}
-				response = requests.get("http://localhost:8989/v1/download",data= form_data)
-				self.new_user(response, path, hashkey, module_name, user_os)
+				form_data={"mac_id": mac_id, "key": frame.result, "path": False}
+				response = requests.get("%s/v1/download"%url, data= form_data)
+				self.new_user(response, path, frame.result, module_name, user_os)
 
 		except requests.ConnectionError:
 			raise StandardError("Your internet connection is not working")	
 		return
-		"""
 
 	def already_registered_user(self, response, path, hashkey, module_name, user_os):
 
@@ -325,7 +324,7 @@ class CanvasPanel(wx.Frame):
 		return
 
 
-	def new_user(self, response, path, hashkey, module_name, user_os):
+	def new_user(self, response, path, key, module_name, user_os):
 		#if path doesnt exists the response will have the zip file and this writes that encrypted zip file into the path
 		file_name = open(path, "w")
 		file_name.write(response.content)
@@ -335,14 +334,14 @@ class CanvasPanel(wx.Frame):
 		dirpath = tempfile.mkdtemp()
 		print dirpath
 				
-		form_data={"mac_id": getHwAddr("eth0"), "key": key, "path": True}
-		response = requests.get("http://localhost:8989/v1/download", data= form_data)
+		form_data={"mac_id": getHwAddr(), "key": key, "path": True}
+		response = requests.get("%s/v1/download"%url, data= form_data)
 		
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
 				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
 				
-				zip_file = zipfile.ZipFile("Whole.zip")
+				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name)) 
 				zipfile.ZipFile.extractall(zip_file)
 				
 				subprocess.call(["ls"])

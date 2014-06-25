@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>NameError: global name 'find_one' is not defined // Werkzeug Debugger</title>
+    <link rel="stylesheet" href="?__debugger__=yes&amp;cmd=resource&amp;f=style.css" type="text/css">
+    <!-- We need to make sure this has a favicon so that the debugger does not by
+         accident trigger a request to /favicon.ico which might change the application
+         state. -->
+    <link rel="shortcut icon" href="?__debugger__=yes&amp;cmd=resource&amp;f=console.png">
+    <script type="text/javascript" src="?__debugger__=yes&amp;cmd=resource&amp;f=jquery.js"></script>
+    <script type="text/javascript" src="?__debugger__=yes&amp;cmd=resource&amp;f=debugger.js"></script>
+    <script type="text/javascript">
+      var TRACEBACK = 24094992,
+          CONSOLE_MODE = false,
+          EVALEX = true,
+          SECRET = "QZlvOU4q70Rq8LV8hhLj";
+    </script>
+  </head>
+  <body>
+    <div class="debugger">
+<h1>NameError</h1>
+<div class="detail">
+  <p class="errormsg">NameError: global name 'find_one' is not defined</p>
+</div>
+<h2 class="traceback">Traceback <em>(most recent call last)</em></h2>
+<div class="traceback">
+  
+  <ul><li><div class="frame" id="frame-24095248">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
+      line <em class="line">1836</em>,
+      in <code class="function">__call__</code></h4>
+  <pre>return self.wsgi_app(environ, start_response)</pre>
+</div>
+
+<li><div class="frame" id="frame-24095568">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
+      line <em class="line">1820</em>,
+      in <code class="function">wsgi_app</code></h4>
+  <pre>response = self.make_response(self.handle_exception(e))</pre>
+</div>
+
+<li><div class="frame" id="frame-24095632">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
+      line <em class="line">257</em>,
+      in <code class="function">error_router</code></h4>
+  <pre>return self.handle_error(e)</pre>
+</div>
+
+<li><div class="frame" id="frame-24095696">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
+      line <em class="line">1817</em>,
+      in <code class="function">wsgi_app</code></h4>
+  <pre>response = self.full_dispatch_request()</pre>
+</div>
+
+<li><div class="frame" id="frame-24095760">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
+      line <em class="line">1477</em>,
+      in <code class="function">full_dispatch_request</code></h4>
+  <pre>rv = self.handle_user_exception(e)</pre>
+</div>
+
+<li><div class="frame" id="frame-24095824">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
+      line <em class="line">257</em>,
+      in <code class="function">error_router</code></h4>
+  <pre>return self.handle_error(e)</pre>
+</div>
+
+<li><div class="frame" id="frame-24095888">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
+      line <em class="line">1475</em>,
+      in <code class="function">full_dispatch_request</code></h4>
+  <pre>rv = self.dispatch_request()</pre>
+</div>
+
+<li><div class="frame" id="frame-24095952">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
+      line <em class="line">1461</em>,
+      in <code class="function">dispatch_request</code></h4>
+  <pre>return self.view_functions[rule.endpoint](**req.view_args)</pre>
+</div>
+
+<li><div class="frame" id="frame-24096016">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
+      line <em class="line">397</em>,
+      in <code class="function">wrapper</code></h4>
+  <pre>resp = resource(*args, **kwargs)</pre>
+</div>
+
+<li><div class="frame" id="frame-24096080">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/views.py"</cite>,
+      line <em class="line">84</em>,
+      in <code class="function">view</code></h4>
+  <pre>return self.dispatch_request(*args, **kwargs)</pre>
+</div>
+
+<li><div class="frame" id="frame-24096144">
+  <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
+      line <em class="line">487</em>,
+      in <code class="function">dispatch_request</code></h4>
+  <pre>resp = meth(*args, **kwargs)</pre>
+</div>
+
+<li><div class="frame" id="frame-24096208">
+  <h4>File <cite class="filename">"/root/Cyclone2/Authentication/api.py"</cite>,
+      line <em class="line">153</em>,
+      in <code class="function">get</code></h4>
+  <pre>user_data = find_one({&quot;key&quot;: args[&quot;key&quot;]}, fields={&quot;_id&quot;: 0})</pre>
+</div>
+</ul>
+  <blockquote>NameError: global name 'find_one' is not defined</blockquote>
+</div>
+
+<div class="plain">
+  <form action="/?__debugger__=yes&amp;cmd=paste" method="post">
+    <p>
+      <input type="hidden" name="language" value="pytb">
+      This is the Copy/Paste friendly version of the traceback.  <span
+      class="pastemessage">You can also paste this traceback into
+      a <a href="https://gist.github.com/">gist</a>:
+      <input type="submit" value="create paste"></span>
+    </p>
+    <textarea cols="50" rows="10" name="code" readonly>Traceback (most recent call last):
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 257, in error_router
+    return self.handle_error(e)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 257, in error_router
+    return self.handle_error(e)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 397, in wrapper
+    resp = resource(*args, **kwargs)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/views.py", line 84, in view
+    return self.dispatch_request(*args, **kwargs)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 487, in dispatch_request
+    resp = meth(*args, **kwargs)
+  File "/root/Cyclone2/Authentication/api.py", line 153, in get
+    user_data = find_one({"key": args["key"]}, fields={"_id": 0})
+NameError: global name 'find_one' is not defined</textarea>
+  </form>
+</div>
+<div class="explanation">
+  The debugger caught an exception in your WSGI application.  You can now
+  look at the traceback which led to the error.  <span class="nojavascript">
+  If you enable JavaScript you can also use additional features such as code
+  execution (if the evalex feature is enabled), automatic pasting of the
+  exceptions and much more.</span>
+</div>
+      <div class="footer">
+        Brought to you by <strong class="arthur">DON'T PANIC</strong>, your
+        friendly Werkzeug powered traceback interpreter.
+      </div>
+    </div>
+  </body>
+</html>
+
+<!--
+
+Traceback (most recent call last):
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1836, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1820, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 257, in error_router
+    return self.handle_error(e)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1817, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1477, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 257, in error_router
+    return self.handle_error(e)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1475, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/app.py", line 1461, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 397, in wrapper
+    resp = resource(*args, **kwargs)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask/views.py", line 84, in view
+    return self.dispatch_request(*args, **kwargs)
+  File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 487, in dispatch_request
+    resp = meth(*args, **kwargs)
+  File "/root/Cyclone2/Authentication/api.py", line 153, in get
+    user_data = find_one({"key": args["key"]}, fields={"_id": 0})
+NameError: global name 'find_one' is not defined
+
+-->
