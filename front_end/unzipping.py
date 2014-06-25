@@ -4,7 +4,10 @@
 import wx
 import threading
 from wx.lib.pubsub import Publisher
-TASK_RANGE = 50
+from wx.lib.delayedresult import startWorker
+import time
+import zipfile
+from wx.lib.pubsub import Publisher
 
 class Example(wx.Frame):
            
@@ -25,7 +28,7 @@ class Example(wx.Frame):
 		hbox2 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox3 = wx.BoxSizer(wx.HORIZONTAL)
 
-		self.gauge = wx.Gauge(pnl, range=TASK_RANGE, size=(250, 25))
+		self.gauge = wx.Gauge(pnl, size=(250, 25))
 		self.gauge.SetBezelFace(3)
 		self.gauge.SetShadowWidth(3)
 		
@@ -49,61 +52,48 @@ class Example(wx.Frame):
 		self.Centre()
 		self.Show(True)     
 		
+
+        
 #	def OnOk(self, e):
- #       
-#		if self.count >= TASK_RANGE:
-#			return
-#		
 #		self.timer.Start(100)
-#		self.text.SetLabel('Task in Progress')
+#		self.text.SetLabel("You pressed ok button")
+#		return 
 
-	def OnStop(self, e):
-        
-		if self.count == 0 or self.count >= TASK_RANGE or not self.timer.IsRunning():
-			return
-
-		self.timer.Stop()
-		self.text.SetLabel('Task Interrupted')
-        
-	def OnOk(self, e):
-        
-		self.text.SetLabel("You pressed ok button")
-
-		import zipfile
+		
+		
+	def OnOk(self, event):	
 		zf = zipfile.ZipFile('/home/k/Downloads/Data/Economics/win_Economics.zip')
 
-		uncompress_size = sum((file.file_size for file in zf.infolist()))
+		uncompress_size = sum((file_name.file_size for file_name in zf.infolist()))
 		extracted_size = 0
-		import time
+		print uncompress_size
 
-		for file in zf.infolist():
-			extracted_size += file.file_size
-			#thread1 = threading.Thread(target=self.extract_file, args = (zf, file))
-			#thread1.setDaemon(True)
-			#thread1.start()
-		
-			#messege = "Completion %s %%" % (extracted_size * 100/uncompress_size)
-			messege = "nothing new "
-			thread2 = threading.Thread(target=self.change_text, args = (messege, len(zf.infolist())))
-			thread2.setDaemon(True)
-			thread2.start()
-
-        
-                
-	def extract_file(self, zf, file):
-			zf.extract(file, path = "/home/k/Destop/junk")
-			return
-
-	def change_text(self, messege, end):
-		self.count += 1
-		self.text.SetLabel(messege)
-		self.gauge.SetValue(self.count)
-		if self.count == end:
-			self.text.SetLabel('File extracted')
+		for file_name in zf.infolist():
+			extracted_size += file_name.file_size
+			"""
+			thread = threading.Thread(self.extract, args=(zf, file_name))
+			thread.start()
+			"""
+			messege = "Completion %s %%" % (extracted_size * 100/uncompress_size)
+			
+			print messege
+			self.text.SetLabel(str(file_name.file_size))
+			wx.CallAfter(self.gauge.SetValue, extracted_size)
+			
+			self.count += 1
+			if self.count == len(zf.infolist()):
+				self.text.SetLabel('File extracted')
+				wx.Bell()
+				return 
 		return
+
+	def extract(self, zf, file_name):
+		zf.extract(file_name, path = "/home/k/Destop/junk/")
+		return
+
 def main():
     
-	ex = wx.App()
+	ex = wx.App(False)
 	Example(None)
 	ex.MainLoop()    
 
