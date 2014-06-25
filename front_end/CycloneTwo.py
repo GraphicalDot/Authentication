@@ -16,6 +16,7 @@ import hashlib
 import tempfile
 import zipfile
 import shutil
+import base64
 from uuid import getnode as get_mac
 
 
@@ -24,7 +25,7 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-
+url = "http://localhost:8989"
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
@@ -68,6 +69,8 @@ def getHwAddr():
 
 class Form(wx.Frame):
 	def __init__(self):
+
+		self.payment_receipt_image = None
 		self.form_data = dict()
 		w = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_X)
 		h = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
@@ -110,6 +113,16 @@ class Form(wx.Frame):
 		vbox1.Add((0,15))
 		
 
+		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+		choose_button = wx.Button(self.pnl, label='Payment jpeg', id=wx.ID_ANY) 
+		self.Bind(wx.EVT_BUTTON,  self.OnOpen, id=choose_button.GetId())
+		hbox1.Add(choose_button, flag=wx.LEFT, border=5)
+		self.control = wx.TextCtrl(self.pnl, size= (200, 30), name="jpeg image", style=wx.TE_MULTILINE)
+		hbox1.Add(self.control, flag=wx.LEFT, border = 66)
+		vbox1.Add(hbox1)
+		vbox1.Add((0,15))
+		
+		
 		courses = ["Accounting", "Economics", "Finance", "Philosophy"]
 		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
 		hbox1.Add(wx.StaticText(self.pnl, label='Modules'))
@@ -117,6 +130,9 @@ class Form(wx.Frame):
 		vbox1.Add(hbox1)
 		vbox1.Add((0,15))
 		
+		
+
+
 		sbs.Add(vbox1)
         
 		self.pnl.SetSizer(sbs)
@@ -155,9 +171,9 @@ class Form(wx.Frame):
 				self.form_data[child.GetName()] = child.GetValue()
 		
 		self.form_data["platform"] = sys.platform
-		self.form_data["mac_id"] = getHwAddr("eth0")
-
-		response = requests.post("%s/register_user"%url, data=self.form_data)
+		self.form_data["mac_id"] = getHwAddr()
+		self.form_data["payment_receipt_image"] = self.payment_receipt_image
+		response = requests.post("%s/v1/register_user"%url, data=self.form_data)
 		dlg = wx.MessageDialog(self, response.json().get("messege"), "Notification", wx.OK | wx.ICON_WARNING)
 		dlg.ShowModal()
 		dlg.Destroy()
@@ -172,6 +188,20 @@ class Form(wx.Frame):
         	self.Destroy()
         
 
+	def OnOpen(self,e):
+		""" Open a file"""
+		self.dirname = ''
+		dlg = wx.FileDialog(self, "Choose a file", self.dirname, "", "*.*", wx.OPEN)
+		if dlg.ShowModal() == wx.ID_OK:
+			self.filename = dlg.GetFilename()
+			self.dirname = dlg.GetDirectory()
+			f = open(os.path.join(self.dirname, self.filename), 'rb')
+			self.control.SetValue(os.path.join(self.dirname, self.filename))
+			self.payment_receipt_image = base64.encodestring(f.read())
+			print self.payment_receipt_image
+			f.close()
+		dlg.Destroy()
+
 
 #This list has all the colors available in wx python
 
@@ -184,7 +214,7 @@ class CanvasPanel(wx.Frame):
 		self.panel = wx.Panel(self, 3, style=wx.RAISED_BORDER)
 
 		font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
-		font.SetPointSize(11)
+		font.SetPointSize(8)
 		text = """    Welcome to Cyclone2  
 		
 				If you have your own personal authentication code, 
@@ -209,7 +239,7 @@ class CanvasPanel(wx.Frame):
 		self.button_box.Add(self.button_three, wx.ALIGN_RIGHT|wx.EXPAND)
 
 		self.button_panel.SetSizer(self.button_box)
-		self.hbox.Add(self.panel, 1, wx.EXPAND | wx.ALL, 3)
+		self.hbox.Add(self.panel, 2, wx.EXPAND | wx.ALL, 3)
 		self.hbox.Add(self.button_panel, 1, wx.EXPAND | wx.ALL, 3)
 		self.SetSizerAndFit(self.hbox)
 		self.SetBackgroundColour("light blue")
@@ -243,7 +273,6 @@ class CanvasPanel(wx.Frame):
 			dlg.ShowModal()
 			dlg.Destroy()
 			return
-		
 		"""
 		module_name = response.json()["module_name"]
 		hashkey = response.json()["hash"]

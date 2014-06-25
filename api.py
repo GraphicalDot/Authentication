@@ -27,6 +27,7 @@ reguser_parser.add_argument('email_id', type=str, required=True, location='form'
 reguser_parser.add_argument('platform', type=str, required=True, location='form')
 reguser_parser.add_argument('modules', type=str, required=True, location='form')
 reguser_parser.add_argument('country', type=str, required=True, location='form')
+reguser_parser.add_argument('payment_receipt_image', type=str, required=True, location='form')
 
 
 
@@ -67,6 +68,7 @@ class RegisterUser(restful.Resource):
 
 			args["hash"] = hash
 			args["key"] = key
+			args["approved"] = False
 			users.insert(args, safe=True)
 
 			##TODO: send an email through ses
@@ -99,11 +101,20 @@ class GetFile(restful.Resource):
 
 		if args["check_module"]:#When user has paid the expenses and bought the module
 			if users.find_one({"key": args["key"], "mac_id": args["mac_id"]}):
-				return {
-					"success": True,
-					"error": False,
-					"module_name": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["modules"],
-					"hash": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["hash"],}
+				if users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["approved"]:
+					return {
+						"success": True,
+						"error": False,
+						"module_name": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["modules"],
+						"hash": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["hash"],}
+
+				else:
+					return {
+						"success": False,
+						"error": True,
+						"error_code": 205,
+						"messege": "Your request for approval of your payment is still pending",}
+
 
 		if not users.find_one({"key": args["key"],}): #when the key is wrong
 			if users.find_one({"mac_id": args["mac_id"]}):
