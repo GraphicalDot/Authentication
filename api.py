@@ -199,7 +199,7 @@ class GetFile(restful.Resource):
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
 		response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
-		shutil.rmtree(dirpath)
+		shutil.rmtree(temporary_dir_file)
 
 		return response
 
