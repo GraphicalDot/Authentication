@@ -18,8 +18,9 @@ import json
 import os
 from bson.json_util import dumps
 
-PATH = "/home/k/Downloads/Data"
-#PATH = "/root/Cyclone2/Data"
+#PATH = "/home/k/Downloads/Data"
+PATH = "/root/Cyclone2/Data"
+
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -198,10 +199,8 @@ class GetFile(restful.Resource):
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
 		response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
-		shutil.rmtree(temporary_dir_path)
-		
+		shutil.rmtree(dirpath)
 
-		print response
 		return response
 
 class TestDownload(restful.Resource):
@@ -210,7 +209,7 @@ class TestDownload(restful.Resource):
 		args = test_parser.parse_args()
 
 		#for localhost
-		data_location = "/root/Cyclone2/Data/%s/%s_%s.zip"%(module_name, user_os[:3], module_name)
+		data_location = "%s/%s/%s_%s.zip"%(PATH, module_name, user_os[:3], module_name)
 
 
 		#This creates a temporary folder 

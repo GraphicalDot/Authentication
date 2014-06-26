@@ -25,7 +25,7 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-#url = "http://23.239.29.14:8080"
+url = "http://23.239.29.14:8080"
 url = "http://localhost:8000"
 class Authentication(wx.Dialog):
 	
