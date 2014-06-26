@@ -2,7 +2,7 @@
   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
   <head>
-    <title>NameError: global name 'dirpath' is not defined // Werkzeug Debugger</title>
+    <title>NameError: global name 'temporary_dir_file' is not defined // Werkzeug Debugger</title>
     <link rel="stylesheet" href="?__debugger__=yes&amp;cmd=resource&amp;f=style.css" type="text/css">
     <!-- We need to make sure this has a favicon so that the debugger does not by
          accident trigger a request to /favicon.ico which might change the application
@@ -11,106 +11,106 @@
     <script type="text/javascript" src="?__debugger__=yes&amp;cmd=resource&amp;f=jquery.js"></script>
     <script type="text/javascript" src="?__debugger__=yes&amp;cmd=resource&amp;f=debugger.js"></script>
     <script type="text/javascript">
-      var TRACEBACK = 43017680,
+      var TRACEBACK = 52953808,
           CONSOLE_MODE = false,
           EVALEX = true,
-          SECRET = "3Jv13XAuveE7pFOoBdLE";
+          SECRET = "7BBtbpgopO3UBOSskmcc";
     </script>
   </head>
   <body>
     <div class="debugger">
 <h1>NameError</h1>
 <div class="detail">
-  <p class="errormsg">NameError: global name 'dirpath' is not defined</p>
+  <p class="errormsg">NameError: global name 'temporary_dir_file' is not defined</p>
 </div>
 <h2 class="traceback">Traceback <em>(most recent call last)</em></h2>
 <div class="traceback">
   
-  <ul><li><div class="frame" id="frame-43017936">
+  <ul><li><div class="frame" id="frame-52953936">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
       line <em class="line">1836</em>,
       in <code class="function">__call__</code></h4>
   <pre>return self.wsgi_app(environ, start_response)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018128">
+<li><div class="frame" id="frame-52954128">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
       line <em class="line">1820</em>,
       in <code class="function">wsgi_app</code></h4>
   <pre>response = self.make_response(self.handle_exception(e))</pre>
 </div>
 
-<li><div class="frame" id="frame-43018192">
+<li><div class="frame" id="frame-52954192">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
       line <em class="line">257</em>,
       in <code class="function">error_router</code></h4>
   <pre>return self.handle_error(e)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018256">
+<li><div class="frame" id="frame-52954256">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
       line <em class="line">1817</em>,
       in <code class="function">wsgi_app</code></h4>
   <pre>response = self.full_dispatch_request()</pre>
 </div>
 
-<li><div class="frame" id="frame-43018320">
+<li><div class="frame" id="frame-52954320">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
       line <em class="line">1477</em>,
       in <code class="function">full_dispatch_request</code></h4>
   <pre>rv = self.handle_user_exception(e)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018384">
+<li><div class="frame" id="frame-52954384">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
       line <em class="line">257</em>,
       in <code class="function">error_router</code></h4>
   <pre>return self.handle_error(e)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018448">
+<li><div class="frame" id="frame-52954448">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
       line <em class="line">1475</em>,
       in <code class="function">full_dispatch_request</code></h4>
   <pre>rv = self.dispatch_request()</pre>
 </div>
 
-<li><div class="frame" id="frame-43018512">
+<li><div class="frame" id="frame-52954512">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/app.py"</cite>,
       line <em class="line">1461</em>,
       in <code class="function">dispatch_request</code></h4>
   <pre>return self.view_functions[rule.endpoint](**req.view_args)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018576">
+<li><div class="frame" id="frame-52954576">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
       line <em class="line">397</em>,
       in <code class="function">wrapper</code></h4>
   <pre>resp = resource(*args, **kwargs)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018640">
+<li><div class="frame" id="frame-52954640">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask/views.py"</cite>,
       line <em class="line">84</em>,
       in <code class="function">view</code></h4>
   <pre>return self.dispatch_request(*args, **kwargs)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018704">
+<li><div class="frame" id="frame-52954704">
   <h4>File <cite class="filename">"/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py"</cite>,
       line <em class="line">487</em>,
       in <code class="function">dispatch_request</code></h4>
   <pre>resp = meth(*args, **kwargs)</pre>
 </div>
 
-<li><div class="frame" id="frame-43018768">
+<li><div class="frame" id="frame-52954768">
   <h4>File <cite class="filename">"/root/Cyclone2/Authentication/api.py"</cite>,
       line <em class="line">202</em>,
       in <code class="function">get</code></h4>
-  <pre>shutil.rmtree(dirpath)</pre>
+  <pre>shutil.rmtree(temporary_dir_file)</pre>
 </div>
 </ul>
-  <blockquote>NameError: global name 'dirpath' is not defined</blockquote>
+  <blockquote>NameError: global name 'temporary_dir_file' is not defined</blockquote>
 </div>
 
 <div class="plain">
@@ -146,8 +146,8 @@
   File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 487, in dispatch_request
     resp = meth(*args, **kwargs)
   File "/root/Cyclone2/Authentication/api.py", line 202, in get
-    shutil.rmtree(dirpath)
-NameError: global name 'dirpath' is not defined</textarea>
+    shutil.rmtree(temporary_dir_file)
+NameError: global name 'temporary_dir_file' is not defined</textarea>
   </form>
 </div>
 <div class="explanation">
@@ -191,7 +191,7 @@ Traceback (most recent call last):
   File "/root/Cyclone2/lib/python2.7/site-packages/flask_restful/__init__.py", line 487, in dispatch_request
     resp = meth(*args, **kwargs)
   File "/root/Cyclone2/Authentication/api.py", line 202, in get
-    shutil.rmtree(dirpath)
-NameError: global name 'dirpath' is not defined
+    shutil.rmtree(temporary_dir_file)
+NameError: global name 'temporary_dir_file' is not defined
 
 -->
