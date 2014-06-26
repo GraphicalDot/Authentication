@@ -51,6 +51,11 @@ test_parser = reqparse.RequestParser()
 test_parser.add_argument('password', type=str, required=True, location='form')
 
 
+
+approved_users = reqparse.RequestParser()
+approved_users.add_argument("users", type=str, action="append")
+
+
 class RegisterUser(restful.Resource):
 
     def post(self):
@@ -244,9 +249,23 @@ class Unapproved(restful.Resource):
 
 class ApproveUsers(restful.Resource):
 	def post(self):
-		users = collection("users") 
+		approved_users = args["users"]
+		approved_users = json.loads(approved_users)
+		for user in approved_users:
+			if not users.find_one({"key": user.get("key")}):
+				return 	{"error": True,
+					"success": False,
+					"error_code": 302,
+					"messege": "The following users with key %s doesnt exists %"%user.get("key"),}
 
+			try:
+				user.update({"key": user.get("key")}, {"$set": {"approved": args.get("approved")})
 
+			except Exception as e:
+				return 	{"error": True,
+					"success": False,
+					"error_code": 303,
+					"messege": "The following error occurred  %s while processing user %s "%(e.__str__, user.get("key")), }
 
 class cd:
         """Context manager for changing the current working directory"""

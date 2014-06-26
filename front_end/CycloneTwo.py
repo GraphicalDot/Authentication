@@ -311,11 +311,14 @@ class CanvasPanel(wx.Frame):
 
 		dirpath = tempfile.mkdtemp()
 		print dirpath
+		print path
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
+				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file, pwd=hashkey)
 				
 				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name))
+				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file)
 				
 				if user_os == "win":
@@ -335,22 +338,25 @@ class CanvasPanel(wx.Frame):
 
 	def new_user(self, response, path, key, module_name, user_os):
 		#if path doesnt exists the response will have the zip file and this writes that encrypted zip file into the path
-		file_name = open(path, "w")
-		file_name.write(response.content)
-		file_name.close()
+		zf = zipfile.ZipFile(path, mode='w')
+		zf.write(response.content)
+		zf.close()
 		#Now the Data Folder do have WholeZip.zip and now the path exists
 
 		dirpath = tempfile.mkdtemp()
-		print dirpath
+		print "This is the dir path %s"%dirpath
 				
 		form_data={"mac_id": getHwAddr(), "key": key, "path": True}
 		response = requests.get("%s/v1/download"%url, data= form_data)
 		
+		print 
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
+				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
 				
 				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name)) 
+				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file)
 				
 				if user_os == "win":
