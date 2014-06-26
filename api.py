@@ -14,6 +14,12 @@ import hashlib
 import tempfile
 import subprocess
 import shutil
+import json
+import os
+from bson.json_util import dumps
+
+PATH = "/home/k/Downloads/Data"
+#PATH = "/root/Cyclone2/Data"
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -169,7 +175,7 @@ class GetFile(restful.Resource):
 		#data_location = "/root/Cyclone2/Data/%s/%s_%s.zip"%(module_name, user_os[:3], module_name)
 
 		#for localhost
-		data_location = "/home/k/Downloads/Data/%s/%s_%s.zip"%(module_name, user_os[:3], module_name)
+		data_location = "%s/%s/%s_%s.zip"%(PATH, module_name, user_os[:3], module_name)
 
 
 		#This creates a temporary folder 
@@ -190,9 +196,12 @@ class GetFile(restful.Resource):
 		response.headers['Cache-Control'] = 'no-cache'
 		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
+		response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
-		shutil.rmtree(dirpath)
+		shutil.rmtree(temporary_dir_path)
+		
 
+		print response
 		return response
 
 class TestDownload(restful.Resource):
@@ -225,6 +234,19 @@ class TestDownload(restful.Resource):
 		response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
 		shutil.rmtree(dirpath)
+		return response
+
+
+class Unapproved(restful.Resource):
+	def get(self):
+		users = collection("users") 
+		return dumps(list(users.find({"approved": False}, fields={"_id": 0, "hash": 0, "mac_id": 0})),)
+
+
+class ApproveUsers(restful.Resource):
+	def post(self):
+		users = collection("users") 
+
 
 
 class cd:
@@ -243,6 +265,8 @@ class cd:
 api.add_resource(RegisterUser, '/v1/register_user')
 api.add_resource(GetFile, '/v1/download')
 api.add_resource(TestDownload, '/v1/testdownload')
+api.add_resource(ApproveUsers, '/v1/approved')
+api.add_resource(Unapproved, '/v1/unapproved')
 
 
 

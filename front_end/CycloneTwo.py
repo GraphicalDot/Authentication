@@ -25,7 +25,8 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-url = "http://23.239.29.14:8080"
+#url = "http://23.239.29.14:8080"
+url = "http://localhost:8000"
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
@@ -268,6 +269,8 @@ class CanvasPanel(wx.Frame):
 		form_data={"mac_id": mac_id, "key": frame.result, "check_module": True, "path": False}
 		response = requests.get("%s/v1/download"%url,data= form_data)
 			
+		print response.json()	
+		
 		if response.json().get("error"):
 			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
@@ -277,19 +280,12 @@ class CanvasPanel(wx.Frame):
 		module_name = response.json()["module_name"]
 		hashkey = response.json()["hash"]
 		user_os = sys.platform[:3]
-
 		working_dir = os.path.abspath(os.path.dirname(__file__))
 		#This creates a new working directory with aprent directory in which this .exe is running by the name of the data
-		if not os.path.exists("%s/Data"%working_dir):
-			os.mkdir("%s/Data"%working_dir)
-			if not os.path.exists("%s/Data/%s"%(working_dir, module_name)):
-				with cd("%s/Data"%working_dir):
-					os.mkdir(module_name)
 		
 		
 		path = "%s/Data/%s/%s_%s.zip"%(working_dir, module_name, user_os[:3], module_name)
 		print path
-
 
 		try:
 				
@@ -298,6 +294,12 @@ class CanvasPanel(wx.Frame):
 				self.already_registered_user(response, path, hashkey, module_name, user_os)
 			
 			else:
+				if not os.path.exists("%s/Data"%working_dir):
+					os.mkdir("%s/Data"%working_dir)
+					if not os.path.exists("%s/Data/%s"%(working_dir, module_name)):
+						with cd("%s/Data"%working_dir):
+							os.mkdir(module_name)
+				print "Path dowsnt exixts on this user machine"
 				form_data={"mac_id": mac_id, "key": frame.result, "path": False}
 				response = requests.get("%s/v1/download"%url, data= form_data)
 				self.new_user(response, path, frame.result, module_name, user_os)
@@ -305,7 +307,6 @@ class CanvasPanel(wx.Frame):
 		except requests.ConnectionError:
 			raise StandardError("Your internet connection is not working")	
 		return
-
 	def already_registered_user(self, response, path, hashkey, module_name, user_os):
 
 		dirpath = tempfile.mkdtemp()
@@ -317,8 +318,16 @@ class CanvasPanel(wx.Frame):
 				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name))
 				zipfile.ZipFile.extractall(zip_file)
 				
-				subprocess.call(["ls"])
-				subprocess.call(["wine", "Play me.exe"])
+				if user_os == "win":
+
+					subprocess.call(["ls"])
+					subprocess.call(["wine", "Play me.exe"])
+				elif user_os == "lin":
+					subprocess.call(["ls"])
+					subprocess.call(["wine", "Play me.exe"])
+				
+				else:
+					print "user os cannot be determined"
 		
 		shutil.rmtree(dirpath)
 		return
@@ -344,12 +353,21 @@ class CanvasPanel(wx.Frame):
 				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name)) 
 				zipfile.ZipFile.extractall(zip_file)
 				
-				subprocess.call(["ls"])
-				subprocess.call(["wine", "Play me.exe"])
-		
+				if user_os == "win":
+
+					subprocess.call(["ls"])
+					subprocess.call(["wine", "Play me.exe"])
+				elif user_os == "lin":
+					subprocess.call(["ls"])
+					subprocess.call(["wine", "Play me.exe"])
+				
+				else:
+					print "user os cannot be determined"
+	
 		print dirpath
 		shutil.rmtree(dirpath)
 		return
+
 
 
 
