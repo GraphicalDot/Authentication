@@ -240,7 +240,7 @@ class GetFile(restful.Resource):
 		response.headers['Cache-Control'] = 'no-cache'
 		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
-		response.headers['X-Accel-Redirect'] = temporary_zip_file
+		#response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
 		shutil.rmtree(temporary_dir_path)
 
