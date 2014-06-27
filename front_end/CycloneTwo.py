@@ -25,8 +25,8 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-url = "http://23.239.29.14:8080"
-#url = "http://localhost:8000"
+#url = "http://23.239.29.14:8080"
+url = "http://localhost:8000"
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
@@ -314,17 +314,13 @@ class CanvasPanel(wx.Frame):
 		print path
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
-				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file, pwd=hashkey)
 				
 				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name))
-				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file)
 				
 				if user_os == "win":
-
-					subprocess.call(["ls"])
-					subprocess.call(["wine", "Play me.exe"])
+					subprocess.call(["Play me.exe"])
 				elif user_os == "lin":
 					subprocess.call(["ls"])
 					subprocess.call(["wine", "Play me.exe"])
@@ -340,8 +336,7 @@ class CanvasPanel(wx.Frame):
 		#if path doesnt exists the response will have the zip file and this writes that encrypted zip file into the path
 		zf = zipfile.ZipFile(path, mode='w')
 		zf.fp.write(response.content)
-		fp.close()
-		zf.close()
+		zf.fp.close()
 		#Now the Data Folder do have WholeZip.zip and now the path exists
 
 		dirpath = tempfile.mkdtemp()
@@ -353,17 +348,14 @@ class CanvasPanel(wx.Frame):
 		print 
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
-				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
 				
 				zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name)) 
-				print "path file is corrupted or not %s"%zip_file.testzip()
 				zipfile.ZipFile.extractall(zip_file)
 				
 				if user_os == "win":
 
-					subprocess.call(["ls"])
-					subprocess.call(["wine", "Play me.exe"])
+					subprocess.call(["Play me.exe"])
 				elif user_os == "lin":
 					subprocess.call(["ls"])
 					subprocess.call(["wine", "Play me.exe"])

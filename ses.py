@@ -8,9 +8,13 @@ from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 from boto.ses import SESConnection
+import boto
 
-from bangology import ses_connection as connection
 
+
+
+AWSAccessKeyId=AKIAJJRSIUBZEYECNSLQ
+AWSSecretKey=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
 
 class SESMessage(object):
     """

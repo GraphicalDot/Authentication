@@ -5,7 +5,6 @@ import sys
 import wx
 import requests
 import time
-from helpers import getHwAddr
 url = "http://localhost:8989/v1"
 
 class Form(wx.Frame):
@@ -109,3 +108,17 @@ class Form(wx.Frame):
         def OnClose(self, e):
         	self.Destroy()
         
+def run_app():
+        app = wx.App(False)
+        app.frame = Form()
+        app.frame.Show(True)
+        app.frame.Center()
+        app.MainLoop()
+
+
+
+if __name__ == "__main__":
+
+        run_app()
+
+

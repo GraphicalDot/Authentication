@@ -17,6 +17,12 @@ import shutil
 import json
 import os
 from bson.json_util import dumps
+import boto
+import boto.ses
+
+aws_access_key="AKIAJJRSIUBZEYECNSLQ"                                                                                                                  
+aws_secret_key="ExOqpv3x32ElwliQWNHo6x+s0mxg22gux8r39GAn"
+connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 
 #PATH = "/home/k/Downloads/Data"
 PATH = "/root/Cyclone2/Data"
@@ -68,8 +74,27 @@ class RegisterUser(restful.Resource):
 
 		"""
 		args = reguser_parser.parse_args()
-		print args
 		users = collection("users")
+		
+		
+		if users.find_one({"email_id": args["email_id"], "mac_id": args["mac_id"], "modules": args["modules"]}):
+			return {
+				"error": False,
+				"success": True,
+				"messege": "Registration has already been done"
+				}
+		
+		try:	
+			"print sending an email"
+			connection.verify_email_address(args["email_id"])
+		
+		except boto.exception.BotoServerError:
+			return {
+				"error": False,
+				"success": True,
+				"messege": "The email provided is not valid, Please provide a valid email address"
+				}
+
 
 		if not users.find_one({"email_id": args["email_id"], "mac_id": args["mac_id"], "modules": args["modules"]}):
 		        args = reguser_parser.parse_args()
@@ -81,19 +106,17 @@ class RegisterUser(restful.Resource):
 			args["hash"] = hash
 			args["key"] = key
 			args["approved"] = False
+			args["key_email_sent"] = False	
 			users.insert(args, safe=True)
 
+			#sending an email for verification
+			
 			##TODO: send an email through ses
 			return {
 				"error": False,
 				"success": True,
-				"messege": "Registration has been completed",}
-		
-		return {
-				"error": False,
-				"success": True,
-				"messege": "Registration has already been done"
-				}
+				"messege": "Registration has been completed, A mail has been sent to the email you mentioned and your key is %s"%key,}
+
 
 
 
@@ -112,13 +135,28 @@ class GetFile(restful.Resource):
 		print json.dumps(args)
 
 		if args["check_module"]:#When user has paid the expenses and bought the module
-			if users.find_one({"key": args["key"], "mac_id": args["mac_id"]}):
+			user = users.find_one({"key": args["key"], "mac_id": args["mac_id"]})
+
+			if user:
+
+				if not user["key_email_sent"]:
+					try:
+						connection.send_raw_email("This is the key you need to play metc modules %s"%user["key"], "saurav.1verma@gmail.com", user["email_id"])
+						users.update({"key": user.get("key")}, {"$set": {"key_email_sent": True}})
+					except Exception:
+						return {
+							"error": True,
+							"success": False,
+							"error_code": 208,
+							"messege": " Email address is not verified yet, Please verify your email address.",}
+					
 				if users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["approved"]:
 					return {
 						"success": True,
 						"error": False,
 						"module_name": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["modules"],
 						"hash": users.find_one({"key": args["key"], "mac_id": args["mac_id"]})["hash"],}
+
 
 				else:
 					return {
@@ -259,7 +297,7 @@ class ApproveUsers(restful.Resource):
 					"messege": "The following users with key %s doesnt exists %"%user.get("key"),}
 
 			try:
-				user.update({"key": user.get("key")}, {"$set": {"approved": args.get("approved")})
+				user.update({"key": user.get("key")}, {"$set": {"approved": args.get("approved")}})
 
 			except Exception as e:
 				return 	{"error": True,
