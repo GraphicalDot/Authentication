@@ -3,7 +3,7 @@
 
 
 from flask import Flask
-from flask import request
+from flask import request, jsonify
 from flask.ext import restful
 from flask.ext.restful import reqparse
 from flask import make_response
@@ -19,6 +19,10 @@ import os
 from bson.json_util import dumps
 import boto
 import boto.ses
+import cStringIO
+from PIL import Image
+import base64
+
 
 aws_access_key="AKIAJJRSIUBZEYECNSLQ"                                                                                                                  
 aws_secret_key="ExOqpv3x32ElwliQWNHo6x+s0mxg22gux8r39GAn"
@@ -96,19 +100,33 @@ class RegisterUser(restful.Resource):
 				}
 
 
+		string = args.get("email_id").lower() + args.get("mac_id").lower() + args.get("first_name").lower() + args.get("modules")
+		hash = hashlib.md5(string).hexdigest()
+		key = hash[-10:]
+		args["hash"] = hash
+		args["key"] = key
+		args["approved"] = False
+		args["key_email_sent"] = False	
+		
 		if not users.find_one({"email_id": args["email_id"], "mac_id": args["mac_id"], "modules": args["modules"]}):
-		        args = reguser_parser.parse_args()
-			users = collection("users")
-			string = args.get("email_id").lower() + args.get("mac_id").lower() + args.get("first_name").lower() + args.get("modules")
-			hash = hashlib.md5(string).hexdigest()
-			key = hash[-10:]
+			try:
+				image_output = cStringIO.StringIO()
+				image_output.write(base64.decodestring(args["payment_receipt_image"]))
+				image_output.seek(0)	
+				im = Image.open(image_output)
+				#im.save("/root/Cyclone2/Images/%s.%s"%(key, im.format))
+				payment_receipt_path = "/home/k/Desktop/%s.%s"%(key, im.format)
+				im.save(payment_receipt_path)
+			except IOError:
+				return {
+					"error": False,
+					"success": True,
+					"messege": "The image uploaded is not a valid image file, please upload correct image file",
+					}
 
-			args["hash"] = hash
-			args["key"] = key
-			args["approved"] = False
-			args["key_email_sent"] = False	
+			args["payment_receipt_path"] = payment_receipt_path
 			users.insert(args, safe=True)
-
+		
 			#sending an email for verification
 			
 			##TODO: send an email through ses
@@ -282,13 +300,27 @@ class TestDownload(restful.Resource):
 class Unapproved(restful.Resource):
 	def get(self):
 		users = collection("users") 
-		return dumps(list(users.find({"approved": False}, fields={"_id": 0, "hash": 0, "mac_id": 0})),)
+		return jsonify({"result": [user for user in users.find({"approved": False}, fields={"_id": 0, "hash": 0, "mac_id": 0, "payment_receipt_image": 0})],
+				"success": True,		
+				"error": False,
+				})
 
 
 class ApproveUsers(restful.Resource):
 	def post(self):
-		approved_users = args["users"]
-		approved_users = json.loads(approved_users)
+		users_collection = collection("users") 
+		
+		args = approved_users.parse_args()
+
+		print args
+		users_post = args["users"]
+		print users_post
+		users_p = json.loads(users_post)
+		
+
+		print args
+		print users_p
+		"""
 		for user in approved_users:
 			if not users.find_one({"key": user.get("key")}):
 				return 	{"error": True,
@@ -304,7 +336,9 @@ class ApproveUsers(restful.Resource):
 					"success": False,
 					"error_code": 303,
 					"messege": "The following error occurred  %s while processing user %s "%(e.__str__, user.get("key")), }
+		
 
+		"""
 class cd:
         """Context manager for changing the current working directory"""
         def __init__(self, newPath):

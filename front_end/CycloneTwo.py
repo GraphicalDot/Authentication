@@ -153,6 +153,7 @@ class Form(wx.Frame):
 		self.SetSizerAndFit(vbox)
         
 	def OnSubmit(self, event):
+		self.Disable()
 		print "Onsubmit has been clicked"
 		for child in self.pnl.GetChildren():
 			if isinstance(child, wx.TextCtrl): 
@@ -160,7 +161,16 @@ class Form(wx.Frame):
 					dlg = wx.MessageDialog(self, "%s cannot be left empty"%child.GetName(), "Warning", wx.OK | wx.ICON_WARNING)
 					dlg.ShowModal()
 					dlg.Destroy()
-					return
+				if child.GetName() == "jpeg image":
+					try:
+						open(child.GetValue())
+					except Exception:
+						dlg = wx.MessageDialog(self, "Please enetr a valid file", "Warning", wx.OK | wx.ICON_WARNING)
+						dlg.ShowModal()
+						dlg.Destroy()
+						self.Enable()
+						return
+					
 
 				self.form_data[child.GetName()] = child.GetValue()
 			if isinstance(child, wx.ComboBox): 
@@ -173,6 +183,9 @@ class Form(wx.Frame):
 		
 		self.form_data["platform"] = sys.platform
 		self.form_data["mac_id"] = getHwAddr()
+		
+		print self.form_data
+		
 		self.form_data["payment_receipt_image"] = self.payment_receipt_image
 		response = requests.post("%s/v1/register_user"%url, data=self.form_data)
 		dlg = wx.MessageDialog(self, response.json().get("messege"), "Notification", wx.OK | wx.ICON_WARNING)
@@ -196,11 +209,17 @@ class Form(wx.Frame):
 		if dlg.ShowModal() == wx.ID_OK:
 			self.filename = dlg.GetFilename()
 			self.dirname = dlg.GetDirectory()
-			f = open(os.path.join(self.dirname, self.filename), 'rb')
-			self.control.SetValue(os.path.join(self.dirname, self.filename))
-			self.payment_receipt_image = base64.encodestring(f.read())
-			print self.payment_receipt_image
-			f.close()
+			try:
+				f = open(os.path.join(self.dirname, self.filename), 'rb')
+				self.control.SetValue(os.path.join(self.dirname, self.filename))
+				self.payment_receipt_image = base64.encodestring(f.read())
+				f.close()
+
+			except IOError as e:
+				dlg = wx.MessageDialog(self, "Please enetr a valid file", "Warning", wx.OK | wx.ICON_WARNING)
+				dlg.ShowModal()
+				dlg.Destroy()
+				return
 		dlg.Destroy()
 
 
