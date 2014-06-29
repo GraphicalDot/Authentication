@@ -17,23 +17,20 @@ class Form(wx.Frame):
 		
 		self.pnl = wx.Panel(self)
 
-		vbox = wx.BoxSizer(wx.VERTICAL)
-	
+		topsizer = wx.BoxSizer(wx.VERTICAL)
+
+
 		gridSizer = wx.GridSizer(rows=6, cols=2, hgap=5, vgap=8)
 		titleSizer = wx.BoxSizer(wx.HORIZONTAL)	
 	
 
-		title = wx.StaticText(self.pnl, label ="My Title")
+		title = wx.StaticText(self, label="""This is the user form to be filled to register to play Modules selected, 
+		Please ensure to fill the module and email id correctly""",)
 		titleSizer.Add(title, 0, wx.ALL, 5)
 		
-		sb = wx.StaticBox(self.pnl, label='user form',)
-		sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)        
         
-		vbox1 = wx.BoxSizer(wx.VERTICAL)       
 
-		
-
-		gridSizer.Add(wx.StaticText(self.pnl, label='First Name'), 0, wx.ALIGN_RIGHT)
+		gridSizer.Add(wx.StaticText(self.pnl, label='First Name'), wx.ALIGN_RIGHT)
 		gridSizer.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="first_name"), 0, wx.EXPAND)
 
 
@@ -43,18 +40,17 @@ class Form(wx.Frame):
 		gridSizer.Add(wx.StaticText(self.pnl, label='Email Id'), wx.ALIGN_RIGHT)
 		gridSizer.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="email_id"), 0, wx.EXPAND)
 		
-		gridSizer.Add(wx.StaticText(self.pnl, label='Country'), wx.EXPAND, 3)
-		gridSizer.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="country"), 0, wx.ALIGN_RIGHT, 3)
+		gridSizer.Add(wx.StaticText(self.pnl, label='Country'), wx.ALIGN_RIGHT)
+		gridSizer.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="country"), 0, wx.EXPAND)
 		
 
 		courses = ["Accounting", "Economics", "Finance", "Philosophy"]
 		gridSizer.Add(wx.StaticText(self.pnl, label='Modules'), wx.ALIGN_RIGHT)
-		gridSizer.Add(wx.ComboBox(self.pnl, size= (200, 30), choices=courses, name="modules", style= wx.CB_DROPDOWN|wx.CB_READONLY), wx.EXPAND)
+		gridSizer.Add(wx.ComboBox(self.pnl, size= (200, 30), choices=courses, name="modules", style= wx.CB_DROPDOWN|wx.CB_READONLY),0, wx.EXPAND)
 		
 		
 
-		sbs.Add(gridSizer)
-		self.SetSizer(sbs)        
+		self.pnl.SetSizer(gridSizer)        
        
 		button_box = wx.BoxSizer(wx.HORIZONTAL)
 		submitButton = wx.Button(self, label='Submit', id=wx.ID_ANY)
@@ -65,11 +61,15 @@ class Form(wx.Frame):
 		button_box.Add(submitButton)
 		button_box.Add(closeButton, flag=wx.LEFT, border=5)
 		
-		vbox.Add(titleSizer, 0, wx.CENTER)
-		vbox.Add(wx.StaticLine(self.pnl), 0, wx.ALL|wx.EXPAND, 5)
-		vbox.Add(sbs, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
-		vbox.Add(button_box, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=10)
+		topsizer.Add(titleSizer, 0, wx.CENTER, 5)
+		topsizer.Add(wx.StaticLine(self), 0, wx.ALL|wx.EXPAND, 5)
+		topsizer.Add((10, 20))
+		topsizer.Add(self.pnl, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
+		topsizer.Add(button_box, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=10)
 		
+		
+	
+		self.SetSizerAndFit(topsizer)
 
 
 	def OnSubmit(self, event):
