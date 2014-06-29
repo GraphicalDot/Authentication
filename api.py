@@ -66,6 +66,11 @@ approved_users = reqparse.RequestParser()
 approved_users.add_argument("users", type=str, action="append")
 
 
+
+#The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
+IMAGE_PATH = "/usr/share/nginx/html/Images"
+#IMAGE_PATH = "/home/k/Desktop"
+
 class RegisterUser(restful.Resource):
 
     def post(self):
@@ -114,8 +119,7 @@ class RegisterUser(restful.Resource):
 				image_output.write(base64.decodestring(args["payment_receipt_image"]))
 				image_output.seek(0)	
 				im = Image.open(image_output)
-				#im.save("/root/Cyclone2/Images/%s.%s"%(key, im.format))
-				payment_receipt_path = "/home/k/Desktop/%s.%s"%(key, im.format)
+				payment_receipt_path = "%s/%s.%s"%(IMAGE_PATH, key, im.format)
 				im.save(payment_receipt_path)
 			except IOError:
 				return {
