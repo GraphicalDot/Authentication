@@ -120,7 +120,7 @@ class Form(wx.Frame):
 
 
 
-                courses = ["Accounting", "Economics", "Finance", "Philosophy"]
+                courses = ["English", "Economics", "Accounts", "Geography", "Business Studies", "LIfe Sciences"]
                 gridSizer.Add(wx.StaticText(self.pnl, label='Modules'), wx.ALIGN_RIGHT)
                 gridSizer.Add(wx.ComboBox(self.pnl, size= (200, 30), choices=courses, name="modules", style= wx.CB_DROPDOWN|wx.CB_READONLY),0, wx.EXPAND)
 
@@ -146,89 +146,8 @@ class Form(wx.Frame):
 
                 self.SetSizerAndFit(topsizer)
 
-		"""
-		w = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_X)
-		h = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
-		#wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX | wx.MINIMIZE_BOX
-           	wx.Frame.__init__(self, None, 1, size=(400,500), pos=(w/2, h/3), style=wx.DEFAULT)          
-		
-		self.pnl = wx.Panel(self)
-		vbox = wx.BoxSizer(wx.VERTICAL)
-
-		sb = wx.StaticBox(self.pnl, label='user form')
-		sbs = wx.StaticBoxSizer(sb, orient=wx.VERTICAL)        
-        
-		vbox1 = wx.BoxSizer(wx.VERTICAL)       
-
-		vbox1.Add((0,30))
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(wx.StaticText(self.pnl, label='First Name'))
-		hbox1.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="first_name"), flag=wx.LEFT, border=50)
-		vbox1.Add(hbox1)
-		vbox1.Add((0,15))
-
-
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(wx.StaticText(self.pnl, label='Last Name'))
-		hbox1.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="second_name"), flag=wx.LEFT, border=50)
-		vbox1.Add(hbox1)
-		vbox1.Add((0,15))
-		
-		
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(wx.StaticText(self.pnl, label='Email Id'))
-		hbox1.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="email_id"), flag=wx.LEFT, border=70)
-		vbox1.Add(hbox1)
-		vbox1.Add((0,15))
-		
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(wx.StaticText(self.pnl, label='Country'))
-		hbox1.Add(wx.TextCtrl(self.pnl, size= (200, 30), name="country"), flag=wx.LEFT, border=71)
-		vbox1.Add(hbox1)
-		vbox1.Add((0,15))
-		
-
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		choose_button = wx.Button(self.pnl, label='Payment jpeg', id=wx.ID_ANY) 
-		self.Bind(wx.EVT_BUTTON,  self.OnOpen, id=choose_button.GetId())
-		hbox1.Add(choose_button, flag=wx.LEFT, border=5)
-		self.control = wx.TextCtrl(self.pnl, size= (200, 30), name="jpeg image", style=wx.TE_MULTILINE)
-		hbox1.Add(self.control, flag=wx.LEFT, border = 66)
-		vbox1.Add(hbox1)
-		vbox1.Add((0,15))
-		
-		
-		courses = ["Accounting", "Economics", "Finance", "Philosophy"]
-		hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-		hbox1.Add(wx.StaticText(self.pnl, label='Modules'))
-		hbox1.Add(wx.ComboBox(self.pnl, size= (200, 30), choices=courses, name="modules", style= wx.CB_DROPDOWN|wx.CB_READONLY), flag=wx.LEFT, border=66)
-		vbox1.Add(hbox1)
-		vbox1.Add((0,15))
-		
-		
-
-
-		sbs.Add(vbox1)
-        
-		self.pnl.SetSizer(sbs)
-       
-		button_box = wx.BoxSizer(wx.HORIZONTAL)
-		submitButton = wx.Button(self, label='Submit', id=wx.ID_ANY)
-		self.Bind(wx.EVT_BUTTON,  self.OnSubmit, id=submitButton.GetId())
-		
-		closeButton = wx.Button(self, label='Close', id=wx.ID_ANY)
-		self.Bind(wx.EVT_BUTTON,  self.OnClose, id=closeButton.GetId())
-		button_box.Add(submitButton)
-		button_box.Add(closeButton, flag=wx.LEFT, border=5)
-
-		vbox.Add(self.pnl, proportion=1, flag=wx.ALL|wx.EXPAND, border=5)
-		vbox.Add(button_box, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=10)
-
-		self.SetSizerAndFit(vbox)
-		"""        
 	def OnSubmit(self, event):
 		self.Disable()
-		print "Onsubmit has been clicked"
 		for child in self.pnl.GetChildren():
 			if isinstance(child, wx.TextCtrl): 
 				if not bool(child.GetValue()):
@@ -380,7 +299,6 @@ class CanvasPanel(wx.Frame):
 		
 		
 		path = "%s/Data/%s/%s_%s.zip"%(working_dir, module_name, user_os[:3], module_name)
-		print path
 
 		try:
 				
@@ -421,7 +339,7 @@ class CanvasPanel(wx.Frame):
 					subprocess.call(["wine", "Play me.exe"])
 				
 				else:
-					print "user os cannot be determined"
+					subprocess.call(["wine", "Play me.exe"])
 		
 		shutil.rmtree(dirpath)
 		return
@@ -435,7 +353,6 @@ class CanvasPanel(wx.Frame):
 		#Now the Data Folder do have WholeZip.zip and now the path exists
 
 		dirpath = tempfile.mkdtemp()
-		print "This is the dir path %s"%dirpath
 				
 		form_data={"mac_id": getHwAddr(), "key": key, "path": True}
 		response = requests.get("%s/v1/download"%url, data= form_data)
