@@ -29,7 +29,7 @@ aws_secret_key="ExOqpv3x32ElwliQWNHo6x+s0mxg22gux8r39GAn"
 connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 
 #PATH = "/home/k/Downloads/Data"
-PATH = "/usr/share/nginx/html/Images/"
+PATH = "/root/Cyclone2/Data"
 
 
 app = Flask(__name__)
