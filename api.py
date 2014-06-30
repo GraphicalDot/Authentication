@@ -96,8 +96,8 @@ class RegisterUser(restful.Resource):
 				}
 		
 		try:	
-			"print sending an email"
-			connection.verify_email_address(args["email_id"])
+			if args["email_id"] not in connection.list_verified_email_addresses()['ListVerifiedEmailAddressesResponse']['ListVerifiedEmailAddressesResult']['VerifiedEmailAddresses']:
+				connection.verify_email_address(args["email_id"])
 		
 		except boto.exception.BotoServerError:
 			return {
@@ -320,33 +320,25 @@ class ApproveUsers(restful.Resource):
 		
 		args = approved_users.parse_args()
 
-		print args
 		users_post = args["users"]
-		print users_post
-		users_p = json.loads(users_post)
 		
-
-		print args
-		print users_p
-		"""
-		for user in approved_users:
-			if not users.find_one({"key": user.get("key")}):
+		for user in users_post:
+			user = eval(user)
+			if not users_collection.find_one({"key": user.get("key")}):
 				return 	{"error": True,
 					"success": False,
 					"error_code": 302,
 					"messege": "The following users with key %s doesnt exists %"%user.get("key"),}
 
 			try:
-				user.update({"key": user.get("key")}, {"$set": {"approved": args.get("approved")}})
+				users_collection.update({"key": user.get("key")}, {"$set": {"approved": user.get("approved")}})
 
 			except Exception as e:
 				return 	{"error": True,
 					"success": False,
 					"error_code": 303,
 					"messege": "The following error occurred  %s while processing user %s "%(e.__str__, user.get("key")), }
-		
 
-		"""
 class cd:
         """Context manager for changing the current working directory"""
         def __init__(self, newPath):
