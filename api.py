@@ -339,6 +339,10 @@ class ApproveUsers(restful.Resource):
 					"error_code": 303,
 					"messege": "The following error occurred  %s while processing user %s "%(e.__str__, user.get("key")), }
 
+
+		return 	{"error": False,
+			"success": True,}
+
 class cd:
         """Context manager for changing the current working directory"""
         def __init__(self, newPath):
