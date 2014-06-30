@@ -283,7 +283,6 @@ class CanvasPanel(wx.Frame):
 		form_data={"mac_id": mac_id, "key": frame.result, "check_module": True, "path": False}
 		response = requests.get("%s/v1/download"%url,data= form_data)
 			
-		print response.json()	
 		
 		if response.json().get("error"):
 			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
@@ -294,11 +293,11 @@ class CanvasPanel(wx.Frame):
 		module_name = response.json()["module_name"]
 		hashkey = response.json()["hash"]
 		user_os = sys.platform[:3]
-		working_dir = os.path.abspath(os.path.dirname(__file__))
+		working_dir = os.path.abspath(os.path.dirname("__file__"))
 		#This creates a new working directory with aprent directory in which this .exe is running by the name of the data
 		
 		
-		path = "%s/Data/%s/%s_%s.zip"%(working_dir, module_name, user_os[:3], module_name)
+		path = "%s/%s_%s.zip"%(working_dir, user_os[:3], module_name)
 
 		try:
 				
@@ -307,11 +306,13 @@ class CanvasPanel(wx.Frame):
 				self.already_registered_user(response, path, hashkey, module_name, user_os)
 			
 			else:
+				"""
 				if not os.path.exists("%s/Data"%working_dir):
 					os.mkdir("%s/Data"%working_dir)
 					if not os.path.exists("%s/Data/%s"%(working_dir, module_name)):
 						with cd("%s/Data"%working_dir):
 							os.mkdir(module_name)
+				"""
 				print "Path dowsnt exixts on this user machine"
 				form_data={"mac_id": mac_id, "key": frame.result, "path": False}
 				response = requests.get("%s/v1/download"%url, data= form_data)
@@ -323,8 +324,6 @@ class CanvasPanel(wx.Frame):
 	def already_registered_user(self, response, path, hashkey, module_name, user_os):
 
 		dirpath = tempfile.mkdtemp()
-		print dirpath
-		print path
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
 				zipfile.ZipFile.extractall(zip_file, pwd=hashkey)
@@ -357,7 +356,6 @@ class CanvasPanel(wx.Frame):
 		form_data={"mac_id": getHwAddr(), "key": key, "path": True}
 		response = requests.get("%s/v1/download"%url, data= form_data)
 		
-		print 
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
 				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
@@ -375,7 +373,6 @@ class CanvasPanel(wx.Frame):
 				else:
 					print "user os cannot be determined"
 	
-		print dirpath
 		shutil.rmtree(dirpath)
 		return
 

@@ -24,6 +24,8 @@ from PIL import Image
 import base64
 
 
+URL = "23.239.29.14"
+
 aws_access_key="AKIAJJRSIUBZEYECNSLQ"                                                                                                                  
 aws_secret_key="ExOqpv3x32ElwliQWNHo6x+s0mxg22gux8r39GAn"
 connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
@@ -128,7 +130,9 @@ class RegisterUser(restful.Resource):
 					"messege": "The image uploaded is not a valid image file, please upload correct image file",
 					}
 
-			args["payment_receipt_path"] = payment_receipt_path
+
+			args["payment_receipt_path"]  = ("%s/")%URL + "/".join(payment_receipt_path.split("/")[-2:])
+			#args["payment_receipt_path"] = payment_receipt_path
 			users.insert(args, safe=True)
 		
 			#sending an email for verification
