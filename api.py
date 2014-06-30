@@ -65,7 +65,7 @@ test_parser.add_argument('password', type=str, required=True, location='form')
 
 
 approved_users = reqparse.RequestParser()
-approved_users.add_argument("users", type=str, action="append")
+approved_users.add_argument("key", type=str, required="args")
 
 
 
@@ -315,34 +315,33 @@ class Unapproved(restful.Resource):
 
 
 class ApproveUsers(restful.Resource):
-	def post(self):
+	def get(self):
 		users_collection = collection("users") 
 		
 		args = approved_users.parse_args()
 
-		users_post = args["users"]
+		user_key = args["key"]
+
+		print user_key
 		
-		for user in users_post:
-			user = eval(user)
-			if not users_collection.find_one({"key": user.get("key")}):
+		if not users_collection.find_one({"key": user_key}):
 				return 	{"error": True,
 					"success": False,
 					"error_code": 302,
-					"messege": "The following users with key %s doesnt exists %"%user.get("key"),}
+					"messege": "The following users with key %s doesnt exists"%user_key,}
 
-			try:
-				users_collection.update({"key": user.get("key")}, {"$set": {"approved": user.get("approved")}})
+		try:
+			users_collection.update({"key": user_key}, {"$set": {"approved": True}})
 
-			except Exception as e:
-				return 	{"error": True,
-					"success": False,
-					"error_code": 303,
-					"messege": "The following error occurred  %s while processing user %s "%(e.__str__, user.get("key")), }
+		except Exception as e:
+			return 	{"error": True,
+				"success": False,
+				"error_code": 303,
+				"messege": "The following error occurred  %s while processing user %s "%(e.__str__, user_key), }
 
 
 		return 	{"error": False,
 			"success": True,}
-
 class cd:
         """Context manager for changing the current working directory"""
         def __init__(self, newPath):
