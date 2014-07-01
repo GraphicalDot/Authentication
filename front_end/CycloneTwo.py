@@ -25,8 +25,8 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-url = "http://23.239.29.14:8080"
-#url = "http://localhost:8000"
+#url = "http://23.239.29.14:8080"
+url = "http://localhost:8000"
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
@@ -120,7 +120,7 @@ class Form(wx.Frame):
 
 
 
-                courses = ["English", "Economics", "Accounts", "Geography", "Business Studies", "LIfe Sciences"]
+                courses = ["English", "Economics", "Accounts", "Geography", "Business Studies", "Life Sciences"]
                 gridSizer.Add(wx.StaticText(self.pnl, label='Modules'), wx.ALIGN_RIGHT)
                 gridSizer.Add(wx.ComboBox(self.pnl, size= (200, 30), choices=courses, name="modules", style= wx.CB_DROPDOWN|wx.CB_READONLY),0, wx.EXPAND)
 
@@ -158,7 +158,7 @@ class Form(wx.Frame):
 					try:
 						open(child.GetValue())
 					except Exception:
-						dlg = wx.MessageDialog(self, "Please enetr a valid file", "Warning", wx.OK | wx.ICON_WARNING)
+						dlg = wx.MessageDialog(self, "Please enter a valid file", "Warning", wx.OK | wx.ICON_WARNING)
 						dlg.ShowModal()
 						dlg.Destroy()
 						self.Enable()
@@ -172,12 +172,16 @@ class Form(wx.Frame):
 					dlg.ShowModal()
 					dlg.Destroy()
 					return
-				self.form_data[child.GetName()] = child.GetValue()
-		
+
+
+				combobox_value = "".join(child.GetValue().split(" "))
+				self.form_data[child.GetName()] = combobox_value
+				
 		self.form_data["platform"] = sys.platform
 		self.form_data["mac_id"] = getHwAddr()
 		
 		
+	
 		self.form_data["payment_receipt_image"] = self.payment_receipt_image
 		
 		try:
@@ -230,10 +234,10 @@ class CanvasPanel(wx.Frame):
 
 		font = wx.SystemSettings_GetFont(wx.SYS_SYSTEM_FONT)
 		font.SetPointSize(8)
-		text = """    Welcome to Cyclone2  
+		text = """    Welcome to METC 
 		
-				If you have your own personal authentication code, 
-				Please press yes Otherwise, press no to make a new registration.
+				If have authentication code, prese yes
+				or press no to make a new registration.
 		"""   
 
 		self.text = wx.StaticText(self.panel, label=text)
@@ -315,7 +319,14 @@ class CanvasPanel(wx.Frame):
 				"""
 				print "Path dowsnt exixts on this user machine"
 				form_data={"mac_id": mac_id, "key": frame.result, "path": False}
+				
 				response = requests.get("%s/v1/download"%url, data= form_data)
+				if response.json().get("error"):
+					dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
+					dlg.ShowModal()
+					dlg.Destroy()
+					return
+				
 				self.new_user(response, path, frame.result, module_name, user_os)
 
 		except requests.ConnectionError:

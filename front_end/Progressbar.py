@@ -3,6 +3,9 @@ import wx.lib.newevent
 import thread
 import exceptions
 import time
+import zipfile
+import os
+import shutil
 
 (RunEvent, EVT_RUN) = wx.lib.newevent.NewEvent()
 (CancelEvent, EVT_CANCEL) = wx.lib.newevent.NewEvent()
@@ -24,14 +27,10 @@ class ThreadedJob:
 		self.isPaused = False
 		self.isRunning = False
 		self.keepGoing = True
-
+#		self.secondsPerTick = 0
 	def Start(self):
-		try:
-			self.keepGoing = self.isRunning = True
-			thread.start_new_thread(self.Run, ())
-		except Exception as e:
-			print e
-
+		self.keepGoing = self.isRunning = True
+		thread.start_new_thread(self.Run, ())
 		self.isPaused = False
 
 	def Stop(self):
@@ -122,132 +121,135 @@ class ThreadedJob:
 		if hasattr(self, "win") and self.win:
 			wx.PostEvent(self.win, DoneEvent())
 
-        # flag we're done before we post the all done message
 		self.isRunning = False
-    #
-#
 
 class EggTimerJob(ThreadedJob):
-    """ A sample Job that demonstrates the mechanisms and features of the Threaded Job"""
-    def __init__(self, duration):
-        self.duration = duration
-        ThreadedJob.__init__(self)
-    #
+	""" A sample Job that demonstrates the mechanisms and features of the Threaded Job"""
+	def __init__(self, src, dist):
+		self.src = src
+		self.dist = dist
+		ThreadedJob.__init__(self)
 
-    def Run(self):
-        """ This can either be run directly for synchronous use of the job,
-        or started as a thread when ThreadedJob.Start() is called.
 
-        It is responsible for calling JobBeginning, JobProgress, and JobFinished.
-        And as often as possible, calling PossibleStoppingPoint() which will 
-        sleep if the user pauses, and raise an exception if the user cancels.
-        """
-        self.time0 = time.clock()
-        self.JobBeginning(self.duration)
 
-        try:
-            for count in range(0, self.duration):
-                time.sleep(1.0)
-                self.JobProgress(count)
-                self.PossibleStoppingPoint()
-            #
-        except InterruptedException:
-            # clean up if user stops the Job early
-            print "canceled prematurely!"
-        #
+	def Run(self):
+		try:
+			self.sudo_run()
+		except Exception as e:
+			print e
 
-        # always signal the end of the job
-        self.JobFinished()
-        #
-    #
 
-    def __str__(self):
-        """ The job progress dialog expects the job to describe its current state."""
-        response = []
-        if self.isPaused:
-            response.append("Paused Counting")
-        elif not self.isRunning:
-            response.append("Will Count the seconds")
-        else:
-            response.append("Counting")
-        #
-        return " ".join(response)
-    #
-#
+	def sudo_run(self):
+		self.time0 = time.clock()
+		try:
+			zf = zipfile.ZipFile(self.src)
+
+			uncompressed_size = sum((file_name.file_size for file_name in zf.infolist()))
+			print uncompressed_size
+
+			self.JobBeginning((len(zf.infolist())))
+			extracted_size = 0
+            		count = 0
+			for file_name, count in zip(zf.infolist(), range(len(zf.infolist()))):
+				time.sleep(0.1)
+				print count
+				print file_name.filename
+				zf.extract(file_name, path = self.dist)
+				extracted_size += file_name.file_size
+				self.JobProgress(count)
+				count += 1
+				self.PossibleStoppingPoint()
+
+		except InterruptedException:
+			# clean up if user stops the Job early
+			# unlink / delete the file that is partially copied
+			shutil.rmtree(self.dist)
+			print "canceled, dest deleted!"
+
+		# always signal the end of the job
+		self.JobFinished()
+
+	def __str__(self):
+		""" The job progress dialog expects the job to describe its current state."""
+		response = []
+		if self.isPaused:
+			response.append("Paused Counting")
+		elif not self.isRunning:
+			response.append("Will Count the seconds")
+		else:
+			response.append("Now Extracting...")
+			
+		return " ".join(response)
 
 class FileCopyJob(ThreadedJob):
-    """ A common file copy Job. """
+	""" A common file copy Job. """
 
-    def __init__(self, orig_filename, copy_filename, block_size=32*1024):
+	def __init__(self, orig_filename, copy_filename):
 
-        self.src = orig_filename
-        self.dest = copy_filename
-        self.block_size = block_size
-        ThreadedJob.__init__(self)
-    #
+		self.src = orig_filename
+		self.dest = copy_filename
+		ThreadedJob.__init__(self)
 
-    def Run(self):
-        """ This can either be run directly for synchronous use of the job,
-        or started as a thread when ThreadedJob.Start() is called.
+	def Run(self):
+		""" This can either be run directly for synchronous use of the job, or started as a thread when ThreadedJob.Start() is called.
+		It is responsible for calling JobBeginning, JobProgress, and JobFinished. And as often as possible, calling PossibleStoppingPoint() 
+		which will sleep if the user pauses, and raise an exception if the user cancels.
+		"""
 
-        It is responsible for calling JobBeginning, JobProgress, and JobFinished.
-        And as often as possible, calling PossibleStoppingPoint() which will 
-        sleep if the user pauses, and raise an exception if the user cancels.
-        """
-        self.time0 = time.clock()
+		self.time0 = time.clock()
+		
 
-        try:
-            source = open(self.src, 'rb')
+		try:
+			source = open(self.src, 'rb')
 
-            # how many blocks?
-            import os
-            (st_mode, st_ino, st_dev, st_nlink, st_uid, st_gid, st_size, st_atime, st_mtime, st_ctime) = os.stat(self.src)
-            num_blocks = st_size / self.block_size
-            current_block = 0
+           
+	   		import os
+			(st_mode, st_ino, st_dev, st_nlink, st_uid, st_gid, st_size, st_atime, st_mtime, st_ctime) = os.stat(self.src)
+			num_blocks = st_size / self.block_size
+			current_block = 0
+		
+			zf = zipfile.ZipFile(self.src)
 
-            self.JobBeginning(num_blocks)
+	                uncompress_size = sum((file_name.file_size for file_name in zf.infolist()))
+        	        extracted_size = 0
 
-            dest = open(self.dest, 'wb')
+			self.JobBeginning(num_blocks)
 
-            while 1:
-                copy_buffer = source.read(self.block_size)
-                if copy_buffer:
-                    dest.write(copy_buffer)
-                    current_block += 1
-                    self.JobProgress(current_block)
-                    self.PossibleStoppingPoint()
-                else:
-                    break
+			#dest = open(self.dest, 'wb')
 
-            source.close()
-            dest.close()
+			for file_name in zf.infolist():
+				zf.extract(file_name, path = self.dest)
+				extracted_size += file_name.file_size
+				current_block += 1
+				self.JobProgress(current_block)
+				self.PossibleStoppingPoint()
+				#else:
+				#	break
 
-        except InterruptedException:
-            # clean up if user stops the Job early
-            dest.close()
-            # unlink / delete the file that is partially copied
-            os.unlink(self.dest)
-            print "canceled, dest deleted!"
-        #
+			#source.close()
+			#dest.close()
 
-        # always signal the end of the job
-        self.JobFinished()
-        #
-    #
+		except InterruptedException:
+			# clean up if user stops the Job early
+			dest.close()
+			# unlink / delete the file that is partially copied
+			os.unlink(self.dest)
+			print "canceled, dest deleted!"
 
-    def __str__(self):
-        """ The job progress dialog expects the job to describe its current state."""
-        response = []
-        if self.isPaused:
-            response.append("Paused Copy")
-        elif not self.isRunning:
-            response.append("Will Copy a file")
-        else:
-            response.append("Copying")
-        #
-        return " ".join(response)
-    #
-#
+		# always signal the end of the job
+		self.JobFinished()
+
+	def __str__(self):
+		""" The job progress dialog expects the job to describe its current state."""
+		response = []
+		if self.isPaused:
+			response.append("Paused Copy")
+		elif not self.isRunning:
+			response.append("Will Copy a file")
+		else:
+			response.append("Copying")
+		
+		return " ".join(response)
 
 class JobProgress(wx.Dialog):
 	""" This dialog shows the progress of any ThreadedJob.
@@ -265,7 +267,7 @@ class JobProgress(wx.Dialog):
 	def __init__(self, parent, job):
 		self.job = job
 
-		wx.Dialog.__init__(self, parent, -1, "Progress", size=(350,200))
+		wx.Dialog.__init__(self, parent, -1, "Extracting files", size=(350,200))
 
 		# vertical box sizer
 		sizeAll = wx.BoxSizer(wx.VERTICAL)
@@ -301,14 +303,14 @@ class JobProgress(wx.Dialog):
 		sizeButtons.Add((2,2), 1, wx.EXPAND|wx.ADJUST_MINSIZE)
 
 		# Pause Button
-		self.PauseButton = wx.Button(self, -1, "Pause")
-		sizeButtons.Add(self.PauseButton, 0, wx.ALL, 4)
-		self.Bind(wx.EVT_BUTTON, self.OnPauseButton, self.PauseButton)
+		#self.PauseButton = wx.Button(self, -1, "Pause")
+		#sizeButtons.Add(self.PauseButton, 0, wx.ALL, 4)
+		#self.Bind(wx.EVT_BUTTON, self.OnPauseButton, self.PauseButton)
 
 		# Cancel button
-		self.CancelButton = wx.Button(self, wx.ID_CANCEL, "Cancel")
-		sizeButtons.Add(self.CancelButton, 0, wx.ALL, 4)
-		self.Bind(wx.EVT_BUTTON, self.OnCancel, self.CancelButton)
+		#self.CancelButton = wx.Button(self, wx.ID_CANCEL, "Cancel")
+		#sizeButtons.Add(self.CancelButton, 0, wx.ALL, 4)
+		#self.Bind(wx.EVT_BUTTON, self.OnCancel, self.CancelButton)
 
 
 		# Add all the buttons on the bottom row to the dialog
@@ -321,7 +323,7 @@ class JobProgress(wx.Dialog):
 		self.Bind(EVT_PROGRESS_START, self.OnProgressStart)
 		self.Bind(EVT_PROGRESS, self.OnProgress)
 		self.Bind(EVT_DONE, self.OnDone)
-
+		self.SetBackgroundColour("light blue")
 		self.Layout()
 
 	def OnPauseButton(self, event):
@@ -358,11 +360,16 @@ class JobProgress(wx.Dialog):
 		self.JobStatusText.SetLabel("Finished")
 		self.Destroy()
 
+	
+def Run_Job(src, dest):
+	app = wx.PySimpleApp()
+	job = EggTimerJob(src, dest)
+	dlg = JobProgress(None, job)
+	job.SetProgressMessageWindow(dlg)
+	job.Start()
+	dlg.ShowModal()
+
+
 if __name__ == "__main__":
-    app = wx.PySimpleApp()
-    job = EggTimerJob(duration = 10)
-    #job = FileCopyJob("/home/k/movies/The.Internship.2013.720p.BluRay.x264.YIFY.mp4", "/home/k/Desktop/junk.mp4", 1024*1024*10)
-    dlg = JobProgress(None, job)
-    job.SetProgressMessageWindow(dlg)
-    job.Start()
-    dlg.ShowModal()
+	Run_Job("/home/k/Desktop/LIFE SCIENCES_Course.zip", "/home/k/Desktop/junk")
+

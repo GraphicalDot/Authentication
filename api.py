@@ -30,9 +30,12 @@ aws_access_key="AKIAJJRSIUBZEYECNSLQ"
 aws_secret_key="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"
 connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 
-#PATH = "/home/k/Downloads/Data"
-PATH = "/root/Cyclone2/Data"
+PATH = "/home/k/Downloads/Data"
+#PATH = "/root/Cyclone2/Data"
 
+#The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
+#IMAGE_PATH = "/usr/share/nginx/html/Images"
+IMAGE_PATH = "/home/k/Desktop"
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -69,9 +72,6 @@ approved_users.add_argument("key", type=str, required="args")
 
 
 
-#The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
-IMAGE_PATH = "/usr/share/nginx/html/Images"
-#IMAGE_PATH = "/home/k/Desktop"
 
 class RegisterUser(restful.Resource):
 
@@ -247,6 +247,16 @@ class GetFile(restful.Resource):
 		#for localhost
 		data_location = "%s/%s/%s_%s.zip"%(PATH, module_name, user_os[:3], module_name)
 
+		
+		try:
+			open(data_location, "rb")
+		except IOError as e:
+			return{
+					"error": True,
+					"success": False,
+					"error_code": 1216,
+					"messege": "Unfortunately, This module has not been uploaded yet",}
+
 
 		#This creates a temporary folder 
 		temporary_dir_path = tempfile.mkdtemp() 
@@ -332,7 +342,8 @@ class ApproveUsers(restful.Resource):
 
 		try:
 			users_collection.update({"key": user_key}, {"$set": {"approved": True}})
-
+			user = users_collection.find_one({"key": user_key})
+			connection.send_raw_email("Congratulations, Your request has been approved to use emetc %s module"%user["modules"], "saurav.1verma@gmail.com", user["email_id"])
 		except Exception as e:
 			return 	{"error": True,
 				"success": False,
