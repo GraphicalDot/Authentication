@@ -143,29 +143,35 @@ class DownloadJob(ThreadedJob):
 
 
 	def sudo_run(self):
-		self.secondsPerTick = 100
 		self.time0 = time.clock()
-
 		count = 0
 		response = requests.get(self.link, stream=True)
+		
+		if not response.headers.get("content-length"):
+			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
+			dlg.ShowModal()
+			dlg.Destroy()
+			return     
+		
+		
 		total_length = int(response.headers.get('content-length'))
 		
-		block_size = 102400
+		block_size = 1024*100
 
 		iter_length = total_length/block_size
 		self.JobBeginning(iter_length)
 		
 		#zf = zipfile.ZipFile(self.src, mode='w')
 
-		with zipfile.ZipFile(self.src, 'w') as zf:
+		with open(self.src, 'wb') as zf:
 			for data in range(iter_length+1):
 				time.sleep(0.1)
-				zf.fp.write(response.raw.read(102400))  
-				#self.src.write(response.raw.read(102400))  
+				#zf.fp.write(response.raw.read(block_size))  
+				zf.write(response.raw.read(102400))  
 				count += 1
 				self.JobProgress(count)
 				self.PossibleStoppingPoint()
-			zf.close()
+			zf.close()	
 		self.JobFinished()
 
 	def __str__(self):
@@ -255,7 +261,7 @@ class JobProgress(wx.Dialog):
 		sizeAll.Add(self.JobStatusText, 0, wx.EXPAND|wx.ALL, 8)
 
 		# wxGague
-		self.ProgressBar = wx.Gauge(self, -1, 10, wx.DefaultPosition, (500, 30))
+		self.ProgressBar = wx.Gauge(self, -1, 10, wx.DefaultPosition, (500, 10))
 		sizeAll.Add(self.ProgressBar, 0, wx.EXPAND|wx.ALL, 8)
 
 		# horiz box sizer, and spacer to right-justify

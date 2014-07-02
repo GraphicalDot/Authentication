@@ -18,7 +18,7 @@ import zipfile
 import shutil
 import base64
 from uuid import getnode as get_mac
-from Progressbar import Run_Unzip
+from Progressbar import Run_Unzip, Run_Download
 
 
 ID_ONE = 1
@@ -338,7 +338,7 @@ class CanvasPanel(wx.Frame):
 				zip_file = zipfile.ZipFile(path) 
 				zipfile.ZipFile.extractall(zip_file, pwd=hashkey)
 				
-				Run_Unzip("%s_%s.zip"%(user_os[:3], module_name), dirpath, None)
+				Run_Unzip("%s_%s.zip"%(user_os[:3], module_name), dirpath, None, "Extracting files....")
 				#zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name))
 				#zipfile.ZipFile.extractall(zip_file)
 				
@@ -357,19 +357,21 @@ class CanvasPanel(wx.Frame):
 
 
 	def new_user(self, response, path, key, module_name, user_os, mac_id):
-		r = requests.get("%s/v1/download?mac_id=%s&key=%s&path=%s"%(url, mac_id, key, False))
+		#r = requests.get("%s/v1/download?mac_id=%s&key=%s&path=%s"%(url, mac_id, key, False))
 
-
+		link = "%s/v1/download?mac_id=%s&key=%s&path=%s"%(url, mac_id, key, False)
+		"""
 		if r.headers.get("content-length"):
 			dlg = wx.MessageDialog(self, r.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
 			dlg.Destroy()
 			return
+		"""
 
-
-		zf = zipfile.ZipFile(path, mode='w')
-		zf.fp.write(r.content)
-		zf.fp.close()
+		Run_Download(path, link, "Please wait while the file is being downloaded")
+		#zf = zipfile.ZipFile(path, mode='w')
+		#zf.fp.write(r.content)
+		#zf.fp.close()
 
 
 		#if path doesnt exists the response will have the zip file and this writes that encrypted zip file into the path
@@ -384,7 +386,7 @@ class CanvasPanel(wx.Frame):
 				zipfile.ZipFile.extractall(zip_file, pwd=response.json().get("hash"))
 				
 				
-				Run_Unzip("%s_%s.zip"%(user_os[:3], module_name), dirpath, None)
+				Run_Unzip("%s_%s.zip"%(user_os[:3], module_name), dirpath, None, "Extracting files....")
 				#zip_file = zipfile.ZipFile("%s_%s.zip"%(user_os[:3], module_name)) 
 				#zipfile.ZipFile.extractall(zip_file)
 				

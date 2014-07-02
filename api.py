@@ -34,8 +34,8 @@ connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 PATH = "/root/Cyclone2/Data"
 
 #The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
-#IMAGE_PATH = "/usr/share/nginx/html/Images"
-IMAGE_PATH = "/home/k/Desktop"
+IMAGE_PATH = "/usr/share/nginx/html/Images"
+#IMAGE_PATH = "/home/k/Desktop"
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -352,7 +352,7 @@ class ApproveUsers(restful.Resource):
 		try:
 			users_collection.update({"key": user_key}, {"$set": {"approved": True}})
 			user = users_collection.find_one({"key": user_key})
-			connection.send_raw_email("Congratulations, Your request has been approved to use emetc %s module"%user["modules"], "saurav.1verma@gmail.com", user["email_id"])
+			email = connection.send_raw_email("Congratulations, Your request has been approved to use emetc %s module"%user["modules"], "saurav.1verma@gmail.com", user["email_id"])
 		except Exception as e:
 			return 	{"error": True,
 				"success": False,
