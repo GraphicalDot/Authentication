@@ -26,8 +26,8 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-#url = "http://23.239.29.14:8080"
-url = "http://localhost:8000"
+url = "http://23.239.29.14:8080"
+#url = "http://localhost:8000"
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
@@ -359,8 +359,9 @@ class CanvasPanel(wx.Frame):
 	def new_user(self, response, path, key, module_name, user_os, mac_id):
 		r = requests.get("%s/v1/download?mac_id=%s&key=%s&path=%s"%(url, mac_id, key, False))
 
-		if not r.headers.get("content-length"):
-			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
+
+		if r.headers.get("content-length"):
+			dlg = wx.MessageDialog(self, r.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
 			dlg.Destroy()
 			return

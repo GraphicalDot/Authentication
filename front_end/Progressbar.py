@@ -6,6 +6,8 @@ import time
 import zipfile
 import os
 import shutil
+import requests
+from contextlib import closing
 
 (RunEvent, EVT_RUN) = wx.lib.newevent.NewEvent()
 (CancelEvent, EVT_CANCEL) = wx.lib.newevent.NewEvent()
@@ -125,9 +127,10 @@ class ThreadedJob:
 
 class DownloadJob(ThreadedJob):
 	""" A sample Job that demonstrates the mechanisms and features of the Threaded Job"""
-	def __init__(self, file_name, link):
-		self.src = open(file_name, "wb")
+	def __init__(self, file_name, link, title):
+		self.src = file_name
 		self.link = link
+		self.title = title
 		ThreadedJob.__init__(self)
 
 
@@ -140,20 +143,30 @@ class DownloadJob(ThreadedJob):
 
 
 	def sudo_run(self):
-		import requests
+		self.secondsPerTick = 100
 		self.time0 = time.clock()
 
-		import wx
-		wait = wx.BusyCursor()
-		from contextlib import closing
-		with closing(requests.get(self.link, stream=True)) as response:
-			total_length = int(response.headers.get('content-length'))
-			dlg = wx.MessageDialog(self, "%s cannot be left empty", "Warning", wx.ICON_WARNING) 
-			for data in response.iter_lines():	
-				self.src.write(data)  
-				count += len(data*50)
-			del wait
-			self.JobFinished()
+		count = 0
+		response = requests.get(self.link, stream=True)
+		total_length = int(response.headers.get('content-length'))
+		
+		block_size = 102400
+
+		iter_length = total_length/block_size
+		self.JobBeginning(iter_length)
+		
+		#zf = zipfile.ZipFile(self.src, mode='w')
+
+		with zipfile.ZipFile(self.src, 'w') as zf:
+			for data in range(iter_length+1):
+				time.sleep(0.1)
+				zf.fp.write(response.raw.read(102400))  
+				#self.src.write(response.raw.read(102400))  
+				count += 1
+				self.JobProgress(count)
+				self.PossibleStoppingPoint()
+			zf.close()
+		self.JobFinished()
 
 	def __str__(self):
 		""" The job progress dialog expects the job to describe its current state."""
@@ -163,16 +176,17 @@ class DownloadJob(ThreadedJob):
 		elif not self.isRunning:
 			response.append("Will Count the seconds")
 		else:
-			response.append("Now Extracting...")
+			response.append(self.title)
 			
 		return " ".join(response)
 
 class UnZipJob(ThreadedJob):
 	""" A sample Job that demonstrates the mechanisms and features of the Threaded Job"""
-	def __init__(self, src, dist, hash_key):
+	def __init__(self, src, dist, hash_key, title):
 		self.src = src
 		self.dist = dist
 		self.hash_key = hash_key
+		self.title = title
 		ThreadedJob.__init__(self)
 
 
@@ -210,7 +224,7 @@ class UnZipJob(ThreadedJob):
 		elif not self.isRunning:
 			response.append("Will Count the seconds")
 		else:
-			response.append("Now Extracting...")
+			response.append(self.title)
 			
 		return " ".join(response)
 
@@ -228,10 +242,10 @@ class JobProgress(wx.Dialog):
 	dlg.ShowModal()
 
 	"""
-	def __init__(self, parent, job):
+	def __init__(self, parent,  job):
 		self.job = job
 
-		wx.Dialog.__init__(self, parent, -1, "Extracting files", size=(400,600), style=wx.STAY_ON_TOP)
+		wx.Dialog.__init__(self, parent, -1, size=(600,600), style=wx.STAY_ON_TOP)
 
 		# vertical box sizer
 		sizeAll = wx.BoxSizer(wx.VERTICAL)
@@ -241,7 +255,7 @@ class JobProgress(wx.Dialog):
 		sizeAll.Add(self.JobStatusText, 0, wx.EXPAND|wx.ALL, 8)
 
 		# wxGague
-		self.ProgressBar = wx.Gauge(self, -1, 10, wx.DefaultPosition, (300, 30))
+		self.ProgressBar = wx.Gauge(self, -1, 10, wx.DefaultPosition, (500, 30))
 		sizeAll.Add(self.ProgressBar, 0, wx.EXPAND|wx.ALL, 8)
 
 		# horiz box sizer, and spacer to right-justify
@@ -325,18 +339,18 @@ class JobProgress(wx.Dialog):
 		self.Destroy()
 
 	
-def Run_Unzip(src, dest, hash_key):
+def Run_Unzip(src, dest, hash_key, title):
 	app = wx.App(False)
-	job = UnZipJob(src, dest, hash_key)
+	job = UnZipJob(src, dest, hash_key, title)
 	dlg = JobProgress(None, job)
 	job.SetProgressMessageWindow(dlg)
 	job.Start()
 	dlg.ShowModal()
 
 
-def Run_Download(file_name, link):
+def Run_Download(file_name, link, title):
 	app = wx.App(False)
-	job = DownloadJob(file_name, link)
+	job = DownloadJob(file_name, link, title)
 	dlg = JobProgress(None, job)
 	job.SetProgressMessageWindow(dlg)
 	job.Start()
@@ -344,5 +358,5 @@ def Run_Download(file_name, link):
 
 
 if __name__ == "__main__":
-	Run_Download("/home/k/Desktop/fake.zip", "http://localhost:8000/v1/fake")
+	Run_Download("/home/k/Desktop/fake.zip", "http://localhost:8000/v1/fake", "Please wait while the file is being downloaded")
 
