@@ -146,16 +146,21 @@ class DownloadJob(ThreadedJob):
 		self.time0 = time.clock()
 		count = 0
 		response = requests.get(self.link, stream=True)
-		
+	
+		print response.headers
+
 		if not response.headers.get("content-length"):
+			print "here we have in dialog box"
 			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
 			dlg.Destroy()
 			return     
 		
-		
+	
+		print "no error baby"
 		total_length = int(response.headers.get('content-length'))
 		
+		print total_length
 		block_size = 1024*100
 
 		iter_length = total_length/block_size

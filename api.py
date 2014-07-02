@@ -271,11 +271,13 @@ class GetFile(restful.Resource):
 	
 		#This reads the data from the temporary location present above
 		f = open(temporary_zip_file, "r")
-	
+
+		print str(os.path.getsize(data_location))
+
 		response = make_response(f.read())
 		response.headers['Cache-Control'] = 'no-cache'
 		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
-		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
+		response.headers['content-length'] = str(os.path.getsize(data_location))               
 		#response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
 		print str(os.path.getsize(temporary_zip_file))
