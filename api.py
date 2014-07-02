@@ -55,10 +55,10 @@ reguser_parser.add_argument('payment_receipt_image', type=str, required=True, lo
 
 # '/validate_token' arguments
 zip_parser = reqparse.RequestParser()
-zip_parser.add_argument('mac_id', type=str, required=True, location='form')
-zip_parser.add_argument('key', type=str, required=True, location='form')
-zip_parser.add_argument('path', type=str, required=True, location='form')
-zip_parser.add_argument('check_module', type=str, required=False, location='form')
+zip_parser.add_argument('mac_id', type=str, required=True, location='args')
+zip_parser.add_argument('key', type=str, required=True, location='args')
+zip_parser.add_argument('path', type=str, required=True, location='args')
+zip_parser.add_argument('check_module', type=str, required=False, location='args')
 
 
 
@@ -278,8 +278,18 @@ class GetFile(restful.Resource):
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
 		#response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
+		print str(os.path.getsize(temporary_zip_file))
 		shutil.rmtree(temporary_dir_path)
+		return response
 
+class FakeDownload(restful.Resource):
+	def get(self):
+		data_location = "/home/k/Downloads/Data/Economics/win_Economics.zip"
+		f = open(data_location, "rb") 
+		response = make_response(f.read())
+		response.headers['Cache-Control'] = 'no-cache'
+		response.headers["Content-Disposition"] = "attachment; filename=fake.zip"
+		response.headers['content-length'] = str(os.path.getsize(data_location))               
 		return response
 
 class TestDownload(restful.Resource):
@@ -309,7 +319,6 @@ class TestDownload(restful.Resource):
 		response.headers['Cache-Control'] = 'no-cache'
 		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
 		response.headers['content-length'] = str(os.path.getsize(temporary_zip_file))               
-		response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
 		shutil.rmtree(dirpath)
 		return response
@@ -371,6 +380,7 @@ api.add_resource(GetFile, '/v1/download')
 api.add_resource(TestDownload, '/v1/testdownload')
 api.add_resource(ApproveUsers, '/v1/approved')
 api.add_resource(Unapproved, '/v1/unapproved')
+api.add_resource(FakeDownload, '/v1/fake')
 
 
 
