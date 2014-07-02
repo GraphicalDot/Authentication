@@ -30,12 +30,12 @@ aws_access_key="AKIAJJRSIUBZEYECNSLQ"
 aws_secret_key="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"
 connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 
-#PATH = "/home/k/Downloads/Data"
-PATH = "/root/Cyclone2/Data"
+PATH = "/home/k/Downloads/Data"
+#PATH = "/root/Cyclone2/Data"
 
 #The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
-IMAGE_PATH = "/usr/share/nginx/html/Images"
-#IMAGE_PATH = "/home/k/Desktop"
+#IMAGE_PATH = "/usr/share/nginx/html/Images"
+IMAGE_PATH = "/home/k/Desktop"
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -277,7 +277,7 @@ class GetFile(restful.Resource):
 		response = make_response(f.read())
 		response.headers['Cache-Control'] = 'no-cache'
 		response.headers["Content-Disposition"] = "attachment; filename=%s_%s.zip"%(user_os[:3], module_name)
-		response.headers['content-length'] = str(os.path.getsize(data_location))               
+		response.headers['data-length'] = str(os.path.getsize(temporary_zip_file))               
 		#response.headers['X-Accel-Redirect'] = temporary_zip_file
 		#This deletes the temporary encrypted zip file
 		print str(os.path.getsize(temporary_zip_file))
@@ -354,7 +354,7 @@ class ApproveUsers(restful.Resource):
 		try:
 			users_collection.update({"key": user_key}, {"$set": {"approved": True}})
 			user = users_collection.find_one({"key": user_key})
-			email = connection.send_raw_email("Congratulations, Your request has been approved to use emetc %s module"%user["modules"], "saurav.1verma@gmail.com", user["email_id"])
+			connection.send_raw_email("Congratulations, Your request has been approved to use emetc %s module"%user["modules"], "saurav.1verma@gmail.com", user["email_id"])
 		except Exception as e:
 			return 	{"error": True,
 				"success": False,
