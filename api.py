@@ -30,12 +30,12 @@ aws_access_key="AKIAJJRSIUBZEYECNSLQ"
 aws_secret_key="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"
 connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 
-PATH = "/home/k/Downloads/Data"
-#PATH = "/root/Cyclone2/Data"
+#PATH = "/home/k/Downloads/Data"
+PATH = "/root/Cyclone2/Data"
 
 #The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
-#IMAGE_PATH = "/usr/share/nginx/html/Images"
-IMAGE_PATH = "/home/k/Desktop"
+IMAGE_PATH = "/usr/share/nginx/html/Images"
+#IMAGE_PATH = "/home/k/Desktop"
 
 app = Flask(__name__)
 api = restful.Api(app)
