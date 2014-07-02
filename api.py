@@ -167,7 +167,7 @@ class GetFile(restful.Resource):
 
 				if not user["key_email_sent"]:
 					try:
-						connection.send_raw_email("This is the key you need to play metc modules %s"%user["key"], "saurav.1verma@gmail.com", user["email_id"])
+						connection.send_email("saurav.1verma@gmail.com", "eMetc Notification email", "This is the key you need to play metc modules %s"%user["key"], user["email_id"])
 						users.update({"key": user.get("key")}, {"$set": {"key_email_sent": True}})
 					except Exception:
 						return {
@@ -354,7 +354,7 @@ class ApproveUsers(restful.Resource):
 		try:
 			users_collection.update({"key": user_key}, {"$set": {"approved": True}})
 			user = users_collection.find_one({"key": user_key})
-			connection.send_raw_email("Congratulations, Your request has been approved to use emetc %s module"%user["modules"], "saurav.1verma@gmail.com", user["email_id"])
+			connection.send_email("saurav.1verma@gmail.com", "eMetc Notification email", "Congratulations, Your request has been approved to use emetc %s module"%user["modules"], user["email_id"])
 		except Exception as e:
 			return 	{"error": True,
 				"success": False,
