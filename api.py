@@ -30,12 +30,12 @@ aws_access_key="AKIAJJRSIUBZEYECNSLQ"
 aws_secret_key="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"
 connection = boto.ses.SESConnection(aws_access_key, aws_secret_key)
 
-PATH = "/home/k/Downloads/Data"
-#PATH = "/root/Cyclone2/Data"
+#PATH = "/home/k/Downloads/Data"
+PATH = "/root/Cyclone2/Data"
 
 #The deFAULT PATH WHERE THE IMAGE WILL BE SAVED
-#IMAGE_PATH = "/usr/share/nginx/html/Images"
-IMAGE_PATH = "/home/k/Desktop"
+IMAGE_PATH = "/usr/share/nginx/html/Images"
+#IMAGE_PATH = "/home/k/Desktop"
 
 app = Flask(__name__)
 api = restful.Api(app)
@@ -167,7 +167,7 @@ class GetFile(restful.Resource):
 
 				if not user["key_email_sent"]:
 					try:
-						connection.send_email("saurav.1verma@gmail.com", "eMetc Notification email", "This is the key you need to play metc modules %s"%user["key"], user["email_id"])
+						connection.send_email("jindal.vikram@gmail.com", "eMetc Notification email", "This is the key you need to play metc modules %s"%user["key"], user["email_id"])
 						users.update({"key": user.get("key")}, {"$set": {"key_email_sent": True}})
 					except Exception:
 						return {
@@ -354,7 +354,7 @@ class ApproveUsers(restful.Resource):
 		try:
 			users_collection.update({"key": user_key}, {"$set": {"approved": True}})
 			user = users_collection.find_one({"key": user_key})
-			connection.send_email("saurav.1verma@gmail.com", "eMetc Notification email", "Congratulations, Your request has been approved to use emetc %s module"%user["modules"], user["email_id"])
+			connection.send_email("jindal.vikram@gmail.com", "eMetc Notification email", "Congratulations, Your request has been approved to use emetc %s module"%user["modules"], user["email_id"])
 		except Exception as e:
 			return 	{"error": True,
 				"success": False,

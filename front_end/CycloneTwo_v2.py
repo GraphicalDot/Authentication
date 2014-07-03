@@ -392,7 +392,7 @@ def Run_Download(file_name, link, title):
 class Authentication(wx.Dialog):
 	
 	def __init__(self, parent, id=-1, title="Authentication Window"):
-		wx.Dialog.__init__(self, parent, id, title, size=(-1, -1), style= wx.STAY_ON_TOP)
+		wx.Dialog.__init__(self, parent, id, title, size=(-1, -1), style=wx.STAY_ON_TOP)
 		
 		self.mainSizer = wx.BoxSizer(wx.VERTICAL)
 		self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -431,7 +431,7 @@ def getHwAddr():
 	return get_mac()
 
 class Form(wx.Frame):
-	def __init__(self):
+	def __init__(self, parent):
 
 
 		self.payment_receipt_image = None
@@ -441,7 +441,7 @@ class Form(wx.Frame):
 		w = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_X)
                 h = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
                 #wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX | wx.MINIMIZE_BOX
-                wx.Frame.__init__(self, None, 1, size=(400,500), pos=(w/2, h/3), style=wx.DEFAULT|wx.STAY_ON_TOP|wx.FRAME_FLOAT_ON_PARENT)
+                wx.Frame.__init__(self, parent, 1, size=(400,500), pos=(w/2, h/3), style=wx.DEFAULT|wx.STAY_ON_TOP|wx.FRAME_FLOAT_ON_PARENT)
 
                 self.pnl = wx.Panel(self)
 
@@ -631,7 +631,7 @@ class CanvasPanel(wx.Frame):
 
 	def no_authentication_code(self, event):
 		self.Enable(False)
-		dia = Form()
+		dia = Form(self)
 		dia.Show(True)	
 		self.Enable(True)
 		return
@@ -648,7 +648,6 @@ class CanvasPanel(wx.Frame):
 				button.Disable()
 
 	def yes_authentication_code(self, event):
-		self.Enable(False)
 		#frame = wx.TextEntryDialog(self, "Enter the authentication code", "", style=wx.OK|wx.CANCEL)
 		frame = Authentication(self)
 		frame.ShowModal()
