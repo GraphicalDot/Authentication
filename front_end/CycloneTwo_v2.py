@@ -663,7 +663,6 @@ class CanvasPanel(wx.Frame):
 			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
 			dlg.Destroy()
-			self.Enable(True)
 			return
 		
 		module_name = response.json()["module_name"]
@@ -694,6 +693,18 @@ class CanvasPanel(wx.Frame):
 	def already_registered_user(self, response, path, hashkey, module_name, user_os):
 
 		dirpath = tempfile.mkdtemp()
+		
+		try:
+			zip_file = zipfile.ZipFile(path) 
+		except :
+			dlg = wx.MessageDialog(self, "There was some error while downloading the course file, Please download it again", "Warning", wx.OK | wx.ICON_WARNING)
+		
+			dlg.ShowModal()
+			dlg.Destroy()
+			os.unlink(path)
+			return 
+		
+
 		with  cd(dirpath):
 				zip_file = zipfile.ZipFile(path) 
 				zipfile.ZipFile.extractall(zip_file, pwd=hashkey)
@@ -741,6 +752,14 @@ class CanvasPanel(wx.Frame):
 				
 		response = requests.get("%s/v1/download?mac_id=%s&key=%s&path=%s"%(url, mac_id, key, True))
 	
+		try:
+			zip_file = zipfile.ZipFile(path) 
+		except :
+			dlg = wx.MessageDialog(self, "There was some error while downloading the course file, Please download it again" , "Warning", wx.OK | wx.ICON_WARNING)
+			dlg.ShowModal()
+			dlg.Destroy()
+			os.unlink(path)
+			return 
 		
 
 
