@@ -28,8 +28,8 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-url = "http://23.239.29.14:8000"
-#url = "http://localhost:8000"
+#url = "http://23.239.29.14:8000"
+url = "http://localhost:8000"
 
 (RunEvent, EVT_RUN) = wx.lib.newevent.NewEvent()
 (CancelEvent, EVT_CANCEL) = wx.lib.newevent.NewEvent()
@@ -179,6 +179,7 @@ class DownloadJob(ThreadedJob):
 			return     
 		
 	
+		print "lenght of the content -length header %s"%response.headers.get("content-length")
 		print "no error baby"
 		total_length = int(response.headers.get('content-length'))
 		
