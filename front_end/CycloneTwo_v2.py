@@ -28,8 +28,8 @@ ID_TWO = 2
 ID_THREE = 3
 
 import socket, struct
-#url = "http://23.239.29.14:8000"
-url = "http://localhost:8000"
+url = "http://23.239.29.14:8000"
+#url = "http://localhost:8000"
 
 (RunEvent, EVT_RUN) = wx.lib.newevent.NewEvent()
 (CancelEvent, EVT_CANCEL) = wx.lib.newevent.NewEvent()
@@ -165,20 +165,22 @@ class DownloadJob(ThreadedJob):
 
 
 	def sudo_run(self):
+		print "eneterd into sudo_run"
 		self.time0 = time.clock()
 		count = 0
 		response = requests.get(self.link, stream=True)
 	
 		print response.headers
 
-		if not response.headers.get("content-length"):
+		"""
+		if not response.headers.get("data-length"):
 			print "here we have in dialog box"
-			dlg = wx.MessageDialog(self, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
+			dlg = wx.MessageDialog(None, response.json().get("messege"), "Warning", wx.OK | wx.ICON_WARNING)
 			dlg.ShowModal()
 			dlg.Destroy()
 			return     
 		
-	
+		"""
 		print "lenght of the content -length header %s"%response.headers.get("content-length")
 		print "no error baby"
 		total_length = int(response.headers.get('content-length'))
@@ -193,7 +195,8 @@ class DownloadJob(ThreadedJob):
 
 		with open(self.src, 'wb') as zf:
 			for data in range(iter_length+1):
-				time.sleep(0.1)
+				time.sleep(1)
+				wx.Yield()
 				#zf.fp.write(response.raw.read(block_size))  
 				zf.write(response.raw.read(102400))  
 				count += 1
@@ -242,6 +245,8 @@ class UnZipJob(ThreadedJob):
 		extracted_size = 0
 		count = 0
 		for file_name, count in zip(zf.infolist(), range(len(zf.infolist()))):
+			time.sleep(.5)
+			wx.Yield()
 			zf.extract(file_name, path = self.dist, pwd=self.hash_key)
 			extracted_size += file_name.file_size
 			self.JobProgress(count)
@@ -455,7 +460,7 @@ class Form(wx.Frame):
 
                 title = wx.StaticText(self, label="""This is the user form to be filled to register to play Modules selected, 
                 Please ensure to fill the module and email id correctly""",)
-                titleSizer.Add(title, 0, wx.ALL, 5)
+                titleSizer.Add(title, 1, wx.ALL, 5)
 
 
 
